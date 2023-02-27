@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>TypeScript Workshop</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"
+    />
+    <link rel="stylesheet" href="slides/revealjs/reveal.js/dist/reset.css" />
+    <link rel="stylesheet" href="slides/revealjs/reveal.js/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="slides/revealjs/reveal.js/dist/theme/solarized.css"
+    />
+
+    <!-- Theme used for syntax hislides/ghlighted code -->
+    <link
+      rel="stylesheet"
+      href="slides/revealjs/highlight-js-github-theme.css"
+    />
+    <link rel="stylesheet" href="slides/revealjs/styles.css" />
+  </head>
+
+  <body>
+    <div class="reveal">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-state="title">
+          <h2 class="title" style="font-size: 7rem">
+            <b>TypeScript Advanced</b>
+          </h2>
+
+          <h4>
+            <span class="transparent-bg">
+              <a href="https://nilshartmann.net" target="_blank"
+                >Nils Hartmann</a
+              >
+              |
+              <a href="https://twitter.com/nilshartmann" target="_blank"
+                >@nilshartmann</a
+              >
+            </span>
+          </h4>
+
+          <p style="margin-top: 4rem"></p>
+          <div>
+            <h3><span class="transparent-bg">Repository</span></h3>
+            <p>
+              <span class="transparent-bg"
+                >https://github.com/nilshartmann/typescript-advanced-workshop</span
+              >
+            </p>
+          </div>
+
+          <p style="margin-top: 4rem"></p>
+          <div>
+            <h3><span class="transparent-bg">Slides</span></h3>
+            <p>
+              <span class="transparent-bg">Lokal: 2023-jsdays.html</span>
+            </p>
+            <p>
+              <span class="transparent-bg"
+                >Remote:
+                <a
+                  href="https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html"
+                >
+                  https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html</a
+                ></span
+              >
+            </p>
+          </div>
+        </section>
+        <section>
+          <h2>Nils Hartmann</h2>
+          <p style="margin-top: 2rem">
+            <a href="https://nilshartmann.net" target="_blank"
+              >https://nilshartmann.net</a
+            >
+            /
+            <a href="https://twitter.com/nilshartmann" target="_blank"
+              >@nilshartmann</a
+            >
+          </p>
+          <p style="margin-top: 2rem">
+            <em
+              >Freiberuflicher Software-Entwickler, Berater und Trainer aus
+              Hamburg</em
+            >
+          </p>
+          <p></p>
+          <p style="margin-top: 5rem">
+            Java | JavaScript, TypeScript | React | GraphQL
+          </p>
+          <div style="display: flex; justify-content: center; margin-top: 2rem">
+            <div style="margin-left: 15px">
+              <a href="https://graphql.schule/video-kurs"
+                ><img
+                  style="max-height: 450px"
+                  src="slides/images/screenshot-graphql-kurs.png"
+                /><br />https://graphql.schule/video-kurs</a
+              >
+              <br />
+            </div>
+            <!--  -->
+            <div style="margin-left: 100px">
+              <a href="https://reactbuch.de"
+                ><img
+                  style="max-height: 450px"
+                  src="slides/images/react-buch-v2.jpg"
+                /><br />https://reactbuch.de</a
+              >
+              <br />
+            </div>
+          </div>
+        </section>
+
+        <!-- Das Typsystem von TypeScript hilft uns in der täglichen Arbeit, typische Programmierfehler zu vermeiden. 
+          Dazu schreiben wir Typ-Angaben zum Beispiel an Variablen oder Funktionsargumente. 
+          Die Beschreibung der Typen selbst ist aber gar nicht immer so trivial. 
+          Durch das dynamische Typsystem von JavaScript kann eine Funktion beispielsweise ein beliebiges Objekt entgegennehmen und in 
+          einer abgeleiteten Form zurückgeben. 
+          Für diese Herausforderung bringt TypeScript eine Art Meta-Sprache mit, mit der sich Typen an Hand verschiedener 
+          Regeln programmieren lassen. Damit lassen sich auch für komplexe Anwendungsfälle, zum Beispiel APIs von Bibliotheken, 
+          Typen beschreiben, so dass Nutzerinnen und Nutzer der Funktionen vollständige Typsicherheit haben - 
+          ohne selbst Typdefinitionen schreiben zu müssen.
+
+
+        In diesem Workshop sehen wir uns diese Meta-Sprache an Hand von Beispielen in der Praxis an. 
+        Wir werden unter anderem Mapped Types, Utility Types und Conditional Types untersuchen und sehen, 
+        für welche Anwendungsfälle sie jeweils geeignet sind.
+         Dazu machen wir natürlich auch Übungen, so dass Du das Gelernte direkt Hands-on ausprobieren kannst. 
+         Für den Workshop solltest Du grundsätzliche TypeScript-Kenntnisse mitbringen. 
+        
+        https://javascript-days.de/javascript/advanced-typescript/
+        -->
+
+        <!-- ######################################################  -->
+        <section>
+          <h2>Advanced TypeScript</h2>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+### Hinweis!
+
+* Wir konzentrieren uns hier nur auf die Typ-Ebene
+* Die gezeigten Beispiele kommen daher ohne Implementierung aus
+          </textarea>
+        </section>
+
+        <section>
+          <h2>Eingebaute Typen: any und unknown</h2>
+          <pre
+            class="fragment"
+          ><code class="typescript line-numbers" contenteditable data-trim>
+  // unknown: kann ebefalls alle Typen aufnehmen, erzwingt aber vor der Verwendung Typ-Prüfung
+  function loadData(): unknown { return "" // ok }
+  let b = loadData(); 
+  b.toUpperCase(); // ERROR
+  if (typeof b === "string") {
+    // b ist jetzt string (typeof ist Laufzeitprüfung!)
+    b.toUpperCase(); // OK
+  }
+              </code></pre>
+        </section>
+
+        <section>
+          <h2>Union Types</h2>
+          <p>Variablen, Parameter etc. können mehr als einen Typ annehmen:</p>
+          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
+type Person = { name: string };
+type Movie = { title: string };
+
+function printNameOrTitle(obj: Person | Movie) { 
+
+  console.log(obj.title); // ERR: Property 'title' does not 
+                          // exist on type 'Person | Movie'
+ 
+  if ("title" in obj) { // Abfrage ist ein "Type Guard"
+    // obj ist Movie hier, title ist definiert
+    console.log(obj.title);
+  } else {
+    // obj ist Person hier: name ist definiert
+    console.log(obj.name);
+  }
+}
+
+printNameOrTitle({name: "Klaus"}); //OK
+printNameOrTitle({title: "Pulp Fiction"}); //OK
+printNameOrTitle({label: "Save"}); // ERR
+    
+          </code></pre>
+        </section>
+        <section>
+          <h2>Type Guards</h2>
+          <p>Durch einen Type Guard können Typen "eingeengt" werden</p>
+          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
+type Person = { name: string };
+type Movie = { title: string };
+
+// Wenn diese Funktion true zurueckgibt, nimmt Typescript an,
+// dass das übergebene Argument vom Typ Movie ist
+function isMovie(candidate: any): candidate is Movie {
+  return ("title" in candidate);
+}
+
+function printNameOrTitle(obj: Person | Movie) { 
+  if (isMovie(obj)) {
+    // movie
+  }
+}
+    
+          </code></pre>
+        </section>
+        <section>
+          <h2>Type Assertions</h2>
+          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
+type Person = { name: string };
+type Movie = { title: string };
+
+// Wenn diese Funktion zurueckkehrt (kein Error geworfen wird) nimmt Typescript an,
+// dass das übergebene Argument vom Typ Movie  ist
+function assertIsMovie(candidate: any): asserts candidate is  Movie {
+  if ("title" in candidate) {
+    return;
+  }
+  throw new Error("Candidate is not a movie!")
+}
+
+function printTitle(hopefullyAMovie: any) { 
+  assertPersonIsMovie(hopefullyAMovie)
+  // hopefullyAMovie ist jetzt Movie
+  hopefullyAMovie.title; // OK
+}
+    
+          </code></pre>
+        </section>
+        <section>
+          <h2>String Literal Types</h2>
+          <p>Beispiel: String Aufzählungstyp</p>
+          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
+// Beispiel:             
+type Answer = "Yes" | "No" | "I_dont_care";
+
+const a1:Answer = "Yes"; // OK
+const a2:View = "Maybe" // FEHLER
+
+function fillIn(a: Answer) {
+    if (a === "Yes") { ... } // ok
+    if (v === "Never") { ... } // error: immer false
+}
+
+fillIn("I_dont_care"); //OK
+fillIn("What?"); // ERROR
+          </code></pre>
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### type
+* Mit `type` wird ein __Type Alias__ erzeugt.
+* Ein Type Alias ist nur ein (anderer) Name für einen Typen
+* Man kann immer entweder einen Type Alias oder einen kompletten Typen hinschreiben
+  * ```typescript
+    function createPerson(firstname: string, address: {city: string} ): { firstname: string, address: { city: string } }
+
+    // identisch mit: 
+    type Person = {
+      firstname: string
+      address: { city: string }
+    }
+    type Address = {
+      city: string;
+    }
+    function createPerson(firstname: string, address: Address ): Person
+
+    // identisch mit:
+    type Address = {
+      city: string;
+    }
+    type Person = {
+      firstname: string
+      address: Address
+    }
+    function createPerson(firstname: string, address: Address ): Person
+    ```
+* Man verwendet immer das, was am besten passt
+  * Für häufig verwendete oder komplexe Konstrukte lohnt sich ein Type Alias meistens  
+
+
+---
+### Index Access
+* Mit dem Index Operator kannst Du in JavaScript/TypeScript auf Werte aus einem Objekt zugreifen:
+* ```typescript
+  const person = {
+    firstname: "Klaus",
+    address: { city: "Hamburg", street: Reeperbahn }
+  }
+
+  const address = person["address"];
+  ```
+* Etwas ähnliches kannst Du auch mit Typen machen, wenn du den Typ eines Properties benötigst:
+* ```typescript
+  type Person = {
+    firstname: string
+    address: { city: string }
+  }
+
+  type Address = Person["address"]
+  ```
+* Das kann zum Beispiel hilfreich sein, wenn Du einen Typen hast, den Du nicht selbst beschrieben hast,
+  Du aber einen Typen für eines seiner Property haben möchtest (vielleicht stammt im obigen Beispiel der
+  Typ `Person` aus einer Bibliothek)
+
+---
+### Index Access #2
+* Wenn Du den Typen eines Arrays benötigst, kannst Du statt eines Property-Namens `[number]` hinschreiben:
+* ```typescript
+  type Person = {
+    contacts: [
+      {
+        email: string;
+        phone: string;
+      }
+    ];
+  };
+
+  type Contacts = Person["contacts"];        // Array<{ email: string, phone: string }>
+  type Contact = Person["contacts"][number]; //       { email: string, phone: string }
+
+  declare function addContact(c: Contact): void;
+
+  addContact({email: "nils@nilshartmann.net", phone: "..."})
+  ```
+
+---
+### keyof
+
+* `keyof` liefert einen Union Typen zurück, der alle Keys eines Objektes enthält
+* Damit kann man zum Beispiel erzwingen, das ein Funktionsparameter nur gültige
+  Keys eines Objekts aufnehmen kann:
+* ```typescript
+  type Person = {
+    firstname: string;
+    lastname: string;
+  }
+  declare function logPropertyOfPerson(propName: keyof Person): void;
+
+  logPropertyOfPerson("firstname"); // OK
+  logPropertyOfPerson("age") // ERR: Argument of type '"age"' is not 
+                             // assignable to parameter of type 'keyof Person'
+
+  ```
+---
+### typeof
+
+* Mit `typeof` kann der Typ eines _Werts_ ermittelt werden.
+  * Im Grunde das, was die IDE tut, wenn ihr mit der Maus über einen Variable fahrt
+* ```typescript
+  const languages = {
+    de: "DE",
+    en: "EN"
+  }
+
+  type TLanguages = typeof languages;          // TLanguages ist TYPE,
+                                              //  languages ist WERT (VALUE)
+
+  export declare function translateMessage(msg: string, lang: keyof TLanguages): string;
+
+  // oder:
+  type TLanguageKeys = keyof typeof languages;
+  export declare function translateMessage(msg: string, lang: TLanguageKeys): string;
+
+  ```
+---
+### Generics
+* Mit `any` können wir Funktionen beschreiben, die alle möglichen Typen entgegennehmen
+  und/oder zurückliefern
+  * ```typescript
+    declare function validate(obj: any): any
+    ```
+* Was machen wir aber, wenn wir den übergebenen Typen (für `obj`) an anderer Stelle benötigen?
+  * Zum Beispiel, um sicherzustellen, dass der Rückgabe-Typ identisch ist?
+---
+### Generics
+* Für Funktionen (und Typen) können **Typ Variablen** definiert werden
+* Fast wie Funktionsparameter, nur dass keine __Werte__, sondern __Typen__ angegeben werden
+* ```typescript
+  // Ein Typ, der entweder eine Liste von Dingen ist oder null
+  // (fachlich bescheuertes Beispiel...)
+  type ListOrNull<O> = Array<O> | null;
+   
+  // Idee liefert den übergebenen Wert zurück, oder
+  // null falls dieser ungültig ist (was auch immer "ungültig" hier bedeutet)  
+  declare function validate<O>(o: O): O | null
+  ```
+* Beim Verwenden in einer Funktion wird der __Typ__ entweder vom übergebenen __Wert__ abgeleitet:
+* ```typescript
+  const x = validate("Hallo"); // x ist string | null
+  const y = validate(7); // y ist number | null
+  ```
+* ...oder der Typ wird explizit angegeben. Dann muss der __Wert__ dem angegebenen __Typen__ entsprechen:
+* ```typescript
+  validate<string>("Hallo"); // OK
+  validate<string>(7); // Argument of type 'number' is not assignable to parameter of type 'string'
+  ```
+---
+### Generics: Default-Werte
+* Analog zu "normalen" Funktionsargumenten, können auch bei Generics Default**typen** angegeben werden
+* Wie bei Funktionsargumenten kann auch nur der letzte bzw. die letzten Argumente Default-Typen haben
+* ```typescript
+  declare function validate<O, R = string>(o: O): O | R
+
+  validate(7); // RückgabeTyp: number | string 
+  validate<number>(7); // RückgabeTyp: number | string 
+  validate<number, null>(7); // RückgabeTyp: number | null
+  validate<number, boolean>(7); // RückgabeTyp: number | boolean
+  ```
+* ```typescript
+  type Tuple<X, Y = string> = [X, Y];
+
+  type TupleOfNumberAndStrings = Tuple<number>; // [number, string]
+  type TupleOfStringAndBoolean = Tuple<string, boolean>; // [string, boolean]
+  ```
+
+---
+### Generic: Constraints   
+* Wie bei "normalen" Argumente, können die Typ-Argumente Einschränkungen haben:
+* Die Einschränkungen werden mnit `extends` definiert
+  * Der Übergenene Typ muss dann derselbe oder ein erweiterter sein:
+* ```typescript
+  declare function validateObject<O extends object>(o: O): O | null;
+
+  validateObject({name: "Klaus"}); // OK
+  validateObject({name: "Klaus"}); // ERR: Argument of type 'string' is not 
+                                   // assignable to parameter of type 'object'
+
+  ```
+* ```typescript
+  type Person = { firstname: string | null };
+  declare function getOrDefault<P extends Person>(p: P): P;
+
+  getOrDefault( { } ); // ERR: Property 'firstname' is missing in type '{}' 
+                       // but required in type 'Person'
+  ```
+  
+---
+### Generics mit Union Typen  
+
+* Wenn man einen Union Type als Constraint angibt, muss der übergebene Typ einem
+  der im Union-Typen enthaltenen Typen entsprechen:  
+* ```typescript
+  type ListOfStringsOrBooleans<X extends string|boolean> = Array<X>
+  const c1: ListOfStringsOrBooleans<string> = ["a"]; // Ok
+  const c2: ListOfStringsOrBooleans<boolean> = [true]; // Ok
+
+  const c3: ListOfStringsOrBooleans<boolean> = [true, "string"]; // ERRO
+  const c4: ListOfStringsOrBooleans<number> = [4]; // NO Type 'number' does not satisfy the constraint 'string | boolean'
+
+  declare function validateNumberOrString<O extends string|number>(o: O): O | null    
+  ```
+* Das kann man auch mit `keyof` verbinden, denn `keyof` liefert Union Typen zurück:
+* ```typescript
+  // Fachlich sinnloses Beispiel, schlauere folgen noch 🤓 
+  declare function validatePropertyNameFromObject<O extends keyof Person>(o: O): O | null;
+  ```
+  
+
+---
+### Mögliche Übung
+* getSomething müsste hier möglich sein
+* Ich mach das useState-Beispiel
+* TNs machen getSomething (oder umgekehrt... oder beides 🤔)  
+<!-- .element: class="todo" -->Nils macht die Beispiele aus "Material"
+* Das muss alles inklusive Übung in einer Stunde fertig sein!
+
+---
+### Mapped Types
+* Doku: https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
+* Mit einem _Mapped Type_ kannst Du aus einem bestehenden Typen einen anderen generieren
+
+* Ein Beispiel: eine `validatePerson`-Funktion soll ein `Person`-Objekt entgegennehmen und
+  ein `ValidatedPerson`-Objekt zurückliefern
+  * Das `ValidatedPerson`-Objekt enthält alle Properties von `Person` aber jeweils als `boolean`,
+    um auszudrücken, ob der validierte Wert gültig ist oder nicht:
+    * ```typescript
+      type Person = {
+        firstname: string;
+        lastname: string;
+        age: number;
+      }
+
+      type ValidatedPerson = {
+        firstname: boolean;
+        lastname: boolean;
+        age: boolean;
+      }
+
+      declare function validatePerson(p: Person): ValidatedPerson;
+      ```
+---
+### Mapped Types
+  
+* Der `ValidatePerson`-Typ kann generisch beschrieben werden, so dass er _automatisch_ alle Properties
+  aus Person enthält, deren Typ aber nun jeweils `boolean` ist:
+  * ```typescript
+      type ValidatedPerson = {
+        [Key in keyof Person]: boolean
+      }
+    ```
+* Den Ausdruck `keyof Person` kennen wir schon: hier wird ein Union Typ zurückgeliefert, der aus allen Keys des Objekts besteht
+* Mit `[Key in keyof Person]` wird an dieser Stelle über alle Keys in Person "iteriert" und der Typ des jeweiligen Keys in die Variable `Key` geschrieben
+  * hier also: `firstname`, `lastname` dann `age`
+  * `Key` ist ein Variablenname, den ihr frei vergeben könnt.
+* Auf der rechten Seite vom Doppelpunkt steht (wie gewohnt) der Typ für den jeweiligen Key (hier: `boolean`)  
+* Natürlich können wir alle möglichen Veränderungen im Ziel-Objekt vorgenommen werden, z.B. auch `readonly` hinzugefügt, oder Felder optional gemacht werden:
+  * ```typescript
+    type ValidatedPerson = {
+      readonly [Key in keyof Person]?: boolean
+    }
+  ```
+
+---
+### Mapped Types #2
+
+* Über den Index Access können wir beim Erzeugen des neuen Typen auf die ursprünglichen Typen der Properties des Original-Typen zugreifen
+* Damit können wir zum Beispiel einen Typen bauen, der alle Properties aus dem ursprünglichen Typen hat, diese sind aber im neuen Typen nullable:
+* ```typescript
+  type ValidatedPerson = {
+    [Key in keyof Person]: Person[Key] | null
+  }
+  ```
+---
+### Mapped Types mit Generics
+
+<!-- .element: class="todo" -->validate-Beispiel mit Generic
+
+### Übung Mapped Types:
+
+          
+          </textarea>
+        </section>
+        <section>
+          <h2>Geschafft! 😊</h2>
+          <h3>Vielen Dank für Eure Teilnahme!</h3>
+          <h3>Viel Spaß und Erfolg mit TypeScript!</h3>
+          <p>Wenn ihr noch Fragen habt, könnt ihr mich erreichen:</p>
+          <p>
+            Mail:
+            <a href="mailto:nils@nilshartmann.net">nils@nilshartmann.net</a>
+          </p>
+          <p>
+            Web:
+            <a href="https://nilshartmann.net" target="_blank"
+              >https://nilshartmann.net</a
+            >
+          </p>
+          <p>
+            Twitter:
+            <a href="https://twitter.com/nilshartmann" target="_blank"
+              >@nilshartmann</a
+            >
+          </p>
+          <p>
+            Mastodon:
+            <a href="https://norden.social/@nilshartmann" target="_blank"
+              >@nilshartmann@norden.social
+            </a>
+          </p>
+        </section>
+      </div>
+    </div>
+
+    <script src="slides/revealjs/reveal.js/dist/reveal.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/notes/notes.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/markdown/markdown.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="slides/revealjs/config.js"></script>
+  </body>
+</html>

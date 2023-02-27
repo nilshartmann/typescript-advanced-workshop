@@ -24,9 +24,10 @@ setS2(null); // FEHLER
 //   getSomething({firstname: "Klaus"}, "firstname") // OK
 //   getSomething({firstname: "Klaus"}, "lastname") // ERR, lastname nicht im Objekt vorhanden
 
-function getSomething<O extends object>(o: O, p: keyof O) {
-  return o[p];
-}
+declare function getSomething<O extends object, P extends keyof O>(
+  o: O,
+  p: P
+): O[P];
 
 const f: string = getSomething({ firstname: "" }, "firstname");
 const n: number = getSomething({ fistname: "", age: 32 }, "age");
