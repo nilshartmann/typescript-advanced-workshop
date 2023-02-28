@@ -161,3 +161,142 @@ function ValidateObject() {
   // nur Funktionen für Properties, die im Original Objekt KEINE Funktionen sind!
   // Validator soll andere Namen zurückliefern
 }
+
+function cond() {
+  declare function getLength<O extends string | null>(
+    s: O
+  ): O extends string ? number : null;
+  const a = getLength("123"); // a: number
+  const b = getLength(null); // b: null
+}
+type NumberOrNull<O> = O extends string ? number : null;
+
+function a() {
+  type X = NumberOrNull<string | null | number>;
+}
+
+type S = NumberOrNull<"huhu">; // N = number
+type N = NumberOrNull<123>; // N = null
+type A = NumberOrNull<true>; // A = null
+
+type NumberOrStringOrNull<O> = O extends string
+  ? number
+  : O extends boolean
+  ? string
+  : null;
+
+type T1 = NumberOrStringOrNull<"huhu">; // N = string
+type T2 = NumberOrStringOrNull<123>; // N = null
+type T3 = NumberOrStringOrNull<true>; // A = string
+
+function setter() {
+  type CHAR_MAP = {
+    a: "A";
+    b: "B";
+    c: "C";
+    d: "D";
+    e: "E";
+    f: "F";
+    g: "G";
+    h: "H";
+    i: "I";
+    j: "J";
+    k: "K";
+    l: "L";
+    m: "M";
+    n: "N";
+    o: "O";
+    p: "P";
+    q: "Q";
+    r: "R";
+    s: "S";
+    t: "T";
+    u: "U";
+    v: "V";
+    w: "W";
+    x: "X";
+    y: "Y";
+    z: "Z";
+  };
+
+  type MyCapitalize<STRING extends string> =
+    STRING extends `${infer FIRST_CHAR}${infer REST}`
+      ? FIRST_CHAR extends keyof CHAR_MAP
+        ? `${CHAR_MAP[FIRST_CHAR]}${MyCapitalize<REST>}`
+        : `${FIRST_CHAR}${MyCapitalize<REST>}`
+      : STRING;
+
+  type GetPost = MyCapitalize<"getPost">; // "GetPost"
+}
+
+function notMe() {
+  type A<O> = O extends string ? boolean : never;
+  type B = A<"">;
+  type C = A<7>;
+  type X = string | never; // string
+
+  type NotNull<O> = O extends null ? never : O;
+  type T1 = NotNull<string | null>; // string
+
+  // Macht kein Sinn:
+  type T2 = NotNull<null>; // never
+
+  function ensureNotNull<O>(o: O): NotNull<O> {
+    return "" as any;
+  }
+
+  const b = ensureNotNull(null); // never
+  const c = ensureNotNull("huhu"); // string
+}
+
+function favoriteTeams() {
+  type Teams = "hsv" | "fc bayern" | "st.pauli" | "bvb" | "sc freiburg";
+  type Extract<O, I> = O extends I ? I : never;
+  type FavTeams = Extract<Teams, "hsv" | "sc freiburg">; // OK
+
+  type ExtractTeams<T extends Teams, I extends Teams> = Extract<T, I>;
+  type FT = ExtractTeams<"hsv" | "fc bayern", "hsv">; // OK
+  type FT2 = ExtractTeams<"hsv" | "fc bayern", "st. pauli">; // ERR: Type '"st. pauli"' does not satisfy the constraint 'Teams'
+  type FT3 = ExtractTeams<"schalke 04" | "bvb", "bvb">; // ERR: Type '"schalke 04"' is not assignable to type 'Teams'
+}
+
+declare function validateX<O>(
+  o: O
+): O extends (b: string, ...a: any) => infer A ? A : O;
+
+function infer_() {
+  const p = validateX("fasdfasdf"); // string
+  const p2 = validateX((a: string) => 123); // number
+  const p20 = validateX(() => 123); // number
+  const p3 = validateX((a: number, b: number) => 123); // number
+
+  type X<A> = A extends (infer A)[] ? A : never;
+  type C = X<string[]>;
+  type D = X<boolean>;
+}
+
+function uebungConditional() {
+  type Person = {
+    firstname: string;
+    age: 32;
+    fullname: () => string;
+  };
+
+  type WithoutF<O extends object> = {
+    [K in keyof O as O[K] extends () => any ? never : K]: O[K];
+  };
+
+  type X = WithoutF<Person>;
+
+  const person = {
+    firstname: "...",
+    2: "zwei",
+    [Symbol()]: "geheim",
+  } as const;
+
+  type P = typeof person;
+
+  type X2 = {
+    [K in keyof P as K extends string ? K : never]: P[K];
+  };
+}

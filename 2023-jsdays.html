@@ -542,7 +542,200 @@ fillIn("What?"); // ERROR
 
 <!-- .element: class="todo" -->validate-Beispiel mit Generic
 
+---
 ### Übung Mapped Types:
+
+* Schreibe die Typ-Definitionen für eine generische Validation-Funktion!
+  - Die fiktive `validate`-Funktion validiert ein übergebenes Objekt.
+  - Der Funktion wird als zweiten Parameter ein Objekt übergeben, 
+    das eine Menge von Callback-Funktionen hat, in der die Validierungsregeln implementiert sind
+    - Eine Funktion pro Property im zu validierenden Objekt
+  - Die Funktion liefert ein Objekt zurück, in dem die Validierungsergebnisse der einzelnen Felder (true/false)
+    enthalten sind
+  * ```typescript
+    const person = { firstname: "Mo", age: 32}
+    const personValidator = { 
+      firstname(s) { return s.length > 3 },
+      age(a) { return age > 0 }
+    }
+    const result = validate(person, personValidator);
+          // ^ { firstname: false, age: true }
+    ```
+* Die `validate`-Funktion soll zwei Parameter haben:
+  1. Das zu validierende Objekt 
+  2. Ein Objekt, das Funktionen zum Validieren enthält
+    - Für jedes Property aus dem zu validierenden Objekt soll es eine (Callback-)_Funktion_ geben, die so heißt, wie das Property
+    - Diese Funktion soll einen Parameter haben, der denselben Typ wie das Property hat und `true` oder `false` zurückliefern
+* Die `validate`-Funktion soll ein Objekt zurückliefern, das dieselben Keys wie das zu validierende Objekt hat. Die Typen sollen aber jeweils `boolean` sein.
+
+---
+### Conditional Types
+
+* Mit [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) kannst Du abhängig von einer Bedingung einen Typen oder einen anderen Typen auswählen
+* Die Syntax dabei ist identisch mit dem ternären Operator (`?`) in JavaScript (`a === true ? "ja!" : "nein!"`)
+* Nur dass dabei _Typen_ statt _Werte_ angegeben werden:
+  * ```typescript
+    type NumberOrNull<O> = O extends string ? number : null;
+
+    type S = NumberOrNull<"huhu"> // N = number
+    type N = NumberOrNull<123> // N = null
+    type A = NumberOrNull<true>; // A = null
+    ```
+  * ```typescript
+    type IsPerson<O> = O extends { firstname: string, lastname: string} ? true : false
+    ```
+
+* Conditional Types lassen sich verschachteln (genau wie beim ternären Operator):
+  * ```typescript
+    type NumberOrStringOrNull<O> = O extends string ? number 
+                                 : O extends boolean ? string 
+                                 : null
+
+    type T1 = NumberOrStringOrNull<"huhu">; // T1 = string
+    type T2 = NumberOrStringOrNull<123>; // T2 = null
+    type T3 = NumberOrStringOrNull<true>; // T3 = string     
+    ```
+    
+---
+### Verwendung von Conditional Types
+    
+* Beispiel: 
+  * Eine Funktion nimmt einen `string` oder `null` entgegen. 
+  * Wenn sie mit `string` aufgerufen wurde, soll sie dessen Länge zurückgeben (`number`)
+  * Wenn sie mit `null` aufgerufen wurde, soll sie `null` zurückliefern
+  * ```typescript
+    // So geht's nicht 😢
+    declare function getLength(s: string | null): number | null; 
+
+    const a = getLength("123"); // a: number | null 
+    const b = getLength(null); // b: number | null
+    ```
+* Mit Generics und einem Conditional Type lässt sich das umsetzen: 
+* ```typescript
+    declare function getLength<O extends string | null>(s: O): O extends string ? number : null;
+
+    const a = getLength("123"); // a: number
+    const b = getLength(null); // b: null
+  ```
+
+---
+### Conditional Types
+
+* Wenn Du einen _Union Type_ übergibst, wird die Überprüfung für jeden Typen aus dem Union Type durchgeführt und ein neuer Union Type zurückgeliefert:
+* ```typescript
+  type R = NumberOrNull<string | null | number>; // R = number | null
+  ```
+
+---
+### Conditional Types mit `never`
+
+* Wenn `never` in einem _Union Type_ vorkommt, wird dieser Typ "herausgefiltert"
+* ```typescript
+  type X = string | boolean | never; // string | boolean
+  ```
+* Das kanst Du nutzen, um mit einem Conditional Type aus einer Liste von Typen welche herauszufiltern
+* ```typescript
+  type NotNull<O> = O extends null ? never : O
+  type T1 = NotNull<string | null>; // T1 = string
+
+  // Macht hier kein Sinn, aber s. weiteres Beispiel unten
+  type T2 = NotNull<null>; // T2 = never
+  ```
+* Beispiel:
+  * Eine Funktion, die einen beliebgien Wert entgegennimmt und nur dann zurückkehrt, wenn der Wert nicht `null` ist.
+  * Falls der Wert `null` ist, wird z.B. ein Fehler geworfen.
+  * ```typescript
+     declare function ensureNotNull<O>(o: O): NotNull<O>;
+
+     const c = ensureNotNull("huhu"); // c = string
+
+     // hier macht 'never' jetzt Sinn, da die Funktion 
+     // tatsächlich nie zurückkommt
+     const b = ensureNotNull(null); // b = never
+    ```
+---
+### Type Inference mit Conditional Types
+
+* Mit einem Conditional Type können wir nicht nur Typen überprüfen, sondern auch extrahieren lassen
+* Beispiel:
+  * Eine Funktion nimmt einen Parameter entgegen
+  * Der Rückgabetyp soll dem Typen des Parameters entsprechen. Wie das geht, haben wir schon gesehen:
+  * ```typescript
+    declare function check<O>(o: O): O;
+    ```
+  * Wenn der übergebene Parameter aber selbst eine Funktion ist, soll deren(!) Rückgabetyp zurückgeliefert werden:
+  * ```typescript
+    check( () => 123 ); // Rückgabetyp soll number sein
+    check( () => "Hallo" ); // Rückgabetyp soll string sein
+    ```
+---
+###  Type Inference mit Conditional Types 
+  * Mit einem Conditional-Type können wir prüfen, ob der Parameter ein Funktion ist:
+  * ```typescript
+    O extends (...a: any) => any ? /* Funktion */ : /* Keine Funktion */
+    ```
+* Wenn der Ausdruck des Conditional Types "true" ist, wissen wir das es eine Funktion ist. In dem Fall können wir mit `infer` die Typen der Parameter
+  und/oder des Rückgabewertes extrahieren lassen.
+  * ```typescript
+  O extends (...a: any) => infer A ? 
+     /* Funktion: hier haben wir jetzt O und A */ 
+     : 
+     /* Keine Funktion, nur O */
+    ```
+  * Das können wir nun nutzen, um unsere Anforderung umzusetzen:
+  * ```typescript
+    declare function check<O>(o: O): O extends (...a: any) => infer A ? A : O
+    ```
+---
+###  Type Inference mit Conditional Types 
+* Weitere Beispiele
+* ```typescript
+  // Ermitteln eines Arguments:
+  type FirstArg<O> = O extends (a: infer A, ...args: any) => any ? A : never
+
+  // Typ eines Arrays ermitteln
+  type TypeOfArray<A> = A extends (infer A)[] ? A : never
+  type T1 = TypeOfArray<string[]> // string
+  type T2 = TypeOfArray<boolean>; // never
+  ```
+* Für typische Anforderungen gibt es bereits fertige _Utility Typen_, z.B.:
+  * [Awaited](https://www.typescriptlang.org/docs/handbook/utility-types.html#awaitedtype): Liefert Typ von Promises zurück
+  * [ReturnType](https://www.typescriptlang.org/docs/handbook/utility-types.html#returntypetype): Rückgabe-Typ einer Methode
+  * [InstanceType](https://www.typescriptlang.org/docs/handbook/utility-types.html#instancetypetype): Typ der Instanz einer Klasse
+  
+
+
+
+---
+### Mögliche Übung:
+
+- Teil 1:
+- Baue einen Typen, der aus einer Liste von Typen einen gewählten Typen ausschliesst
+  - bräuchten wir für den nächsten Teil...
+- Teil 2:
+ - Idee: eine Funktion, die alles aus einem Objekt filtert, das eine Funktion ist (z.B. vor Übertragen an Server)
+ - Baue einen Typen, der ein Objekt entgegennimmt und aus dem alle Einträge rauswirft, die Funktionen sind
+ -  `as` erklären
+ -  Sollte auf Teil 1 aufbauen, sonst Teil 1 raus
+
+- Ein Typ, der ein Objekt erwartet und in das Ziel-Objekt nur solche Properties übernimmt, die im Original ein string sind
+  ( oder vom angegebenen Typen)
+- 
+type X2 = {
+  [K in keyof P as K extends string ? K : never]: P[K]
+}    
+- Extract (z.B. mit Fussballteams, weil das lustiger und nicht so trocken ist)
+- Wie könnte man dem Benutzer eine sprechende Fehlermeldung (statt never) geben
+
+---
+### String Template Literal
+
+---
+### Übung: String Template Literal
+
+
+
+- Übung
 
           
           </textarea>
