@@ -125,8 +125,6 @@ function ValidateObject() {
     readonly [K in keyof O]: boolean;
   };
 
-  // Ausgangsbasis wie bei getSomething, O muss ein object sein
-
   type ValidatorFunction<V> = (value: V) => boolean;
 
   type ValidatorObject<O extends object> = {
@@ -299,4 +297,36 @@ function uebungConditional() {
   type X2 = {
     [K in keyof P as K extends string ? K : never]: P[K];
   };
+}
+
+type Color = "red" | "blue" | "green";
+declare function bgColor<C extends Color>(c: Color): { backgroundColor: C };
+
+bgColor("red"); // OK
+bgColor("white"); // Argument of type '"white"' is not assignable to parameter of type 'Color'
+declare function addListener<O extends object, K extends keyof O>(
+  someObject: O,
+  aKey: K
+): (newValue: O[K]) => void;
+function ab() {
+  const person = {
+    firstname: "Klaus",
+    age: 32,
+  };
+
+  addListener(person, "firstname")("newFirstName"); // OK
+  addListener(person, "xxx")("newFirstName"); // Argument of type '"xxx"' is not assignable to parameter of type '"firstname" | "age"
+  addListener(person, "age")(33); // OK
+  addListener(person, "age")("33"); // ERR // Argument of type 'string' is not assignable to parameter of type 'number'
+  addListener("Klaus", "klaus"); // Argument of type 'string' is not assignable to parameter of type 'object'
+}
+
+function x() {
+  type NotNull<O> = O extends null ? never : O;
+  type T1 = NotNull<string | null>; // T1 = string
+  type T2 = NotNull<string | boolean | null | undefined>; // T2 = string | boolean | undefined
+
+  type NotNullOrUndefined<O> = O extends null | undefined ? never : O;
+  type T3 = NotNullOrUndefined<string | null>; // T1 = string
+  type T4 = NotNullOrUndefined<string | boolean | null | undefined>; // T2 = string | boolean | undefined
 }
