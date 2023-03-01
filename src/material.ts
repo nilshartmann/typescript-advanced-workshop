@@ -127,16 +127,26 @@ function ValidateObject() {
 
   type ValidatorFunction<V> = (value: V) => boolean;
 
+  // type ReturnTypeFromVoidFunction<FN> = FN extends () => infer RETVALUE ? never;
+
+  // Übung infer
+  // type ValidatorFunctionWithFunction<V> = V extends (a: infer A, ...args: any) => any ? (value: A) => boolean : (value: V) => boolean;
+
   type ValidatorObject<O extends object> = {
     readonly [K in keyof O]: ValidatorFunction<O[K]>;
   };
 
-  function validateObject<O extends object>(
+  function validateObject<O extends object, V extends Partial<O>>(
     o: O,
-    validators: ValidatorObject<O>
-  ): ValidationResult<O> {
+    validators: ValidatorObject<V>
+  ): ValidationResult<V> {
     return {} as any;
   }
+
+  const r = validateObject(
+    { firstname: "nils", lastname: "hartmann" },
+    { firstname: () => true }
+  );
 
   type Person = {
     firstname: string;

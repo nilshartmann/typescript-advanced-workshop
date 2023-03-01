@@ -571,38 +571,62 @@ beliebigen Objektes zurückliefern.
 
 ---
 ### Mapped Types
-* Ein fachliches Beispiel: eine `validatePerson`-Funktion soll ein `Person`-Objekt entgegennehmen und
-  ein `ValidatedPerson`-Objekt zurückliefern
-  * Das `ValidatedPerson`-Objekt enthält alle Properties von `Person` aber jeweils als `boolean`,
-    um auszudrücken, ob der validierte Wert gültig ist oder nicht:
-    * ```typescript
-      type Person = {
-        firstname: string;
-        age: number;
-      }
-
-      type ValidatedPerson = {
-        firstname: boolean;
-        age: boolean;
-      }
-
-      declare function validatePerson(p: Person): ValidatedPerson;
-      ```
-* Mit einem [_Mapped Type_](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden Typen einen anderen generieren
+* Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
+* Du kannst damit Logik, die in JavaScript auf Werte-Ebene funktioniert auf Typ-Ebene nachbauen
+* Dazu ein Beispiel:
+* ```javascript
+  function validateField(value) {
+    return true; // oder false
+  }
+  function validateObject(object) {
+    if (object == null || typeof object !== "object") {
+      throw new Error("invalid type");
+    }
+    const result = {};
+    Object.keys(object).forEach(k => { 
+      result[k] = validateField(object[k]);
+    });
+    return result;
+  }
+  ```
+* Die Funktion nimmt ein beliebiges Objekt entgegen und liefert ein neues Objekt zurück:
+  * in diesem sind dieselben Keys wie im Ausgangsobjekt vorhanden
+  * Die Werte sind aber in diesem Fall jeweils `true` oder `false` (je nachdem, was die fiktive
+  `validateField`-Funktion zurückgegeben hat.)
 
 ---
 ### Mapped Types
-  
+* Eine - unzureichende - Typ-Definition für diese Funktion könnte so aussehen:
+* ```typescript
+  declare function validateObject(o: object): object;
+
+  const result = validateObject( { firstname: "Klaus", age: 32} );
+    //  ^? result: object
+
+  ```
+* So käme ein _beliebiges_ oder _allgemeines_ Objekt zurück. Wir wissen aber eigentlich genauer, wie das Objekt aussieht, das zurückgeliefert wird.
+* ```typescript
+  const result = validateObject( { firstname: "Klaus", age: 32} );
+    //  präziser Rückgabetype wäre: { firstname: boolean, age: boolean }
+
+  ```
+* Mit einem Mapped Type können wir diese Regel auf Typ-Ebene dynamisch umsetzen, und so diesen präzisen Rückgabe-Typ erzeugen.
+---
+### Mapped Types
+* Um den Rückgabe-Typ von `validateObject` zu beschreiben, können wir einen eigenen Typen definieren (`ValidatedObject`)
 * Der `ValidatePerson`-Typ kann generisch beschrieben werden, so dass er _automatisch_ alle Properties
-  aus Person enthält, deren Typ aber nun jeweils `boolean` ist:
+  aus einem Typen enthält, deren Typ aber nun jeweils `boolean` ist. Für den konkreten Typen `Person` sähe das so aus:
   * ```typescript
-      type ValidatedPerson = {
+      type Person = { firstname: string; age: number };
+      type ValidatedObject = {
         [Key in keyof Person]: boolean
       }
+
+      // ^?  { firstname: boolean; age: boolean }
     ```
 * Den Ausdruck `keyof Person` kennen wir schon: hier wird ein Union Typ zurückgeliefert, der aus allen Keys des Objekts besteht
-* Mit `[Key in keyof Person]` wird an dieser Stelle über alle Keys in Person "iteriert" und der Typ des jeweiligen Keys in die Typ Variable `Key` geschrieben
-  * hier also: `firstname` und dann `age`
+* Mit `[Key in keyof Person]` wird an dieser Stelle über alle Keys in dem Objekt "iteriert" und der Typ des jeweiligen Keys in die Typ Variable `Key` geschrieben
+  * im Beispiel der `Person` wäre das also: `firstname` und dann `age`
   * `Key` ist ein Variablenname, den ihr frei vergeben könnt.
 * Auf der rechten Seite vom Doppelpunkt steht (wie gewohnt) der Typ für das jeweilige Property (hier also: `boolean`)  
 * Natürlich können wir alle möglichen Veränderungen im Ziel-Objekt vorgenommen werden, z.B. auch `readonly` hinzugefügt, oder Felder optional gemacht werden:
@@ -610,45 +634,71 @@ beliebigen Objektes zurückliefern.
     type ValidatedPerson = {
       readonly [Key in keyof Person]?: boolean
     }
+
+    //  ^?  { readonly firstname?: boolean, readonly age?: boolean }
   ```
 * Es gibt bereits fertige [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) für eine Vielzahl typischer Anwendungsfälle,
   z.B. [Partial](https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype), [Required](https://www.typescriptlang.org/docs/handbook/utility-types.html#requiredtype) oder [Readonly](https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype)
+
 ---
 ### Mapped Types #2
-
+* Im vorherigen Beispiel haben wir allen Einträgen eines Objekts einen fixen neuen Typen (`boolean`) zu gewiesen.
+* Es gibt aber auch Fälle, in denen der Typ eines Eintrags aus dem Typen des Originals abgeleitet werden soll.
+* Die modifizierte `validate`-Funktion liefert nicht mehr `boolean` zurück, sondern den Original-Wert eines Feldes oder `null`, falls dieser ungültig ist:
+* ```javascript
+  function validateField(value) {
+    return value; // oder null falls ungültig
+  }
+  function validateObject(object) {
+    // unverändert...
+  }  
+  ```
+* Wenn wir ein Objekt des `Person`-Typen validieren lassen, müsste der Rückgabe-Typ folglich so aussehen:
+* ```typescript
+  const result = validateObject( { firstname: "Klaus", age: 32} )
+     // ^?  { firstname: string | null, age: number | null }
+  ```
 * Über den Index Access können wir beim Erzeugen des neuen Typen auf die ursprünglichen Typen der Properties des Original-Typen zugreifen
 * Damit können wir zum Beispiel einen Typen bauen, der alle Properties aus dem ursprünglichen Typen hat, diese sind aber im neuen Typen nullable:
 * ```typescript
-  type NullablePerson = {
+  type ValidatedObject = {
     [Key in keyof Person]: Person[Key] | null
   }
 
-  // { firstname: string | null, age: number | null }
+  declare function validate(p: Person): ValidatedObject;
+        // ^? { firstname: string | null, age: number | null }
   ```
 ---
 ### Mapped Types mit Generics
 
-* Ein Mapped Type wird besonders in Kombination mit Generics sehr mächtig
+* Unsere `validate`-Funktion soll eigentlich _beliebige_ Objekte validieren und nicht nur `Person`-Objekte.
+* Daher muss unser `ValidatedObject`-Typ _generisch_ sein und eine Typ-Variable verwenden
+* Die Typ-Variable gibt den zu transformierenden Typen an (z.B. `Person`)
 * Damit kannst Du _beliebige_ Typen in andere Typen transformieren:
 * ```typescript
-  type NullableObject<OBJECT extends object> = {
+  type ValidatedObject<OBJECT extends object> = {
     [Key in keyof OBJECT]: OBJECT[Key] | null
   }
 
-  type NullablePerson = NullableObject<Person>;
+  type ValidatedContact = ValidatedObject<{phone: string, mobile: boolean}>;
+        // ^? { phone: string | null, mobile: boolean | null }
+  ```
+* Wie muss die Signatur von der `validate`-Funktion jetzt aussehen? 🤔
+* ```typescript
+  declare function validate<O extends object>(o: O): ValidatedObject<O>;
+  
+  const person = { firstname: "Klaus", age: 123 };
+  const result = validate(person);
         // ^? { firstname: string | null, age: number | null }
 
-  type NullableContact = NullableObject<{ phone: string, mobile: boolean >}
-        // ^? { phone: string | null, mobile: boolean | null }
   ```
 
 ---
 ### Übung Mapped Types:
 
-* Schreibe die Typ-Definitionen für eine generische Validation-Funktion!
-  - Die fiktive `validate`-Funktion validiert ein übergebenes Objekt.
-  - Der `validate`-Funktion wird als zweiten Parameter ein Objekt übergeben, 
-    das eine Menge von Callback-Funktionen hat (`validatorFn`), in der jeweils die Validierungsregel für ein Property implementiert ist
+* Schreibe die Typ-Definitionen für eine weitere Variante der Validation-Funktion!
+  - Der `validate`-Funktion soll nun als zweiten Parameter ein Objekt übergeben entgegen nehmen.
+     - Daran enthalten sind Callback-Funktionen (`ValidatorFn`), in der jeweils die Validierungsregel für ein Property implementiert ist
   - Die `validate`-Funktion liefert ein Objekt zurück, in dem die Validierungsergebnisse der einzelnen Felder (true/false)
     enthalten sind
   - In JavaScript würde das z.B. so aussehen:    
@@ -671,9 +721,11 @@ beliebigen Objektes zurückliefern.
   1. Das zu validierende Objekt 
   2. Ein Objekt, das Funktionen zum Validieren enthält
     - Für jedes Property aus dem zu validierenden Objekt soll es eine (Callback-)_Funktion_ geben, die so heißt, wie das Property
-    - Diese Funktion soll einen Parameter haben, der denselben Typ wie das Property hat und `true` oder `false` zurückliefern
+    - Diese Funktion soll einen Parameter haben, der denselben Typ wie das Property hat und `true` oder `false` zurückliefern (wie gesehen)
 * Die `validate`-Funktion soll ein Objekt zurückliefern, das dieselben Keys wie das zu validierende Objekt hat. Die Typen sollen aber jeweils `boolean` und `readonly` sein.
 * Dann sollte folgendes funktionieren bzw. einen Fehler erzeugen:
+* **Optional:**
+  - Kannst Du die Signatur so bauen, dass das `validateFn`-Objekt eine Untermenge des zu validierenden Objekts ist? Man also für ein Feld im zu validierenden Objekt eine Validator-Callback-Funktion angeben kann oder nicht?
 <!-- .element: class="todo" -->todo: Lösung lieber in Übungsdatei, 
 * ```typescript
 const p = { firstname: "Klaus", lastname: "Meier", age: 32 };
@@ -703,6 +755,12 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
     o: O,
     validators: ValidatorObject<O>
   ) => ValidationResult<O>;
+
+  // Teil 2: Validator-Funktionen sind optional
+  declare function validateObject<O extends object>(
+    o: O,
+    validators: ValidatorObject<Partial<O>>
+  ) => ValidationResult<O>;  
   ```
 
 
@@ -865,6 +923,11 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 ---
 ### Mögliche Übung:
 
+* Erweitere die `validate`-Funktion
+- Statt `validate`-Funtkion Mapper -Funktion
+
+  - 
+
 - Teil 1:
 - Baue einen Typen, der aus einer Liste von Typen einen gewählten Typen ausschliesst
   - bräuchten wir für den nächsten Teil...
@@ -889,9 +952,13 @@ type X2 = {
 ---
 ### Übung: String Template Literal
 
+- Übung Keys umbenennen (zeige ich allerdings auch schon...)
+- 
+---
+### Ausblick (?) String Template Literal mit infer
+- evtl. schon vorher
 
 
-- Übung
 
 ---
 ### todo
