@@ -948,8 +948,55 @@ type X2 = {
 
 ---
 ### Template Literal Types
-- [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
+<!-- .slide: class="left" -->
 <!-- .element: class="todo" -->
+* Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein:
+* ```typescript
+  type Color = "red" | "blue";
+
+  declare function print(msg: string, color: Color): void;
+
+  print("Hallo", "red"); // OK
+  print("World", "black") // ERR
+
+  ```
+
+
+- Mit einem Template String kannst Du in JavaScript aus einem String einen anderen String erzeugen:
+* ```typescript
+  const color = "red";
+  const msg = `My favorite color: ${color}`; 
+  ```
+* Mit einem [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) kannst Du dasselbe auf Typ-Ebene machen:
+<!-- .element: class="todo" -->besseres intro beispiel
+* ```typescript
+  type Color = "red";
+  type Msg = `My favorite color: ${Color}`;
+
+  function say(m: Msg) { /* ... */ }
+  say("My favorite color: red"); // OK
+  say("My favorite color: black"); // ERR: Argument of type '"My favorite color: black"' is not assignable 
+                                   //      to parameter of type '"My favorite color: red"
+  ```
+
+---
+### Text transformieren
+* Ein fachliches Beispiel 
+---
+### Template Literal Types mit Union Types 
+* Beispiel: CSS Klassen Namen
+* ```typescript
+  type Spacing = "margin" | "padding";
+  type Direction = "top" | "right" | "bottom" | "left";
+
+  type CSSClassNames = `${Spacing}-${Direction}`;
+
+  declare function setCssClass(c: CSSClassNames): void;
+  setCssClass("margin-right");  // OK
+  setCssClass("padding-center"); // ERROR
+  ```
+
+
 ---
 ### Keys mit Template Literal Types umbenennen
 <!-- .element: class="todo" -->eventuell auf createObservable umstellen, auf dem man Listener für die Felder registrieren kann
@@ -992,22 +1039,142 @@ type X2 = {
     }
     ```
 * Das funktioniert aber so noch nicht!
-* Es gibt einen Compile-Fehler
+* Es gibt Compile-Fehler:
+  * Im Template Literal dürfen wir nur string, boolean, null etc. angeben aber kein `Symbol`
+  * `Capitalize` erwartet sogar nur einen `string`
 
 ---
 ###  Keys mit Template Literal Types umbenennen
-* Einem Template Literal Type kann nur ein `string` übergeben werden.
-* Der Union Typ von `keyof` liefert aber auch z.B. `number` oder `symbol` zurück, weil diese als Keys an Objekten verwendet werden können
+* Ein Template Literal Type kann nur mit dem Typ `string | number | bigint | boolean | null | undefined` arbeiten
+* Der `Capitalize` ist noch restriktiver: dieser kann nur mit einem `string` verwendet werden
+* Ein Eintrag in `keyof` kann neben `string` aber auch `number` oder `symbol` sein, weil diese als Keys an Objekten verwendet werden können
+* ```typescript
+  const person = {
+    firstname: "Klaus",
+    2: "zwei",
+    [Symbol()]: "geheim",
+  };
+  ```
 * Wir müssen also die Typen aus `keyof` rausfiltern, die keine Strings sind
 * Wie könnten wir das mit einem Union Type und `never` machen? 🤔
 * ```typescript
   type StringKeysOf<O extends object, K = keyof O> = K extends string ? K : never
   ```
+* Es gibt eine andere Alternative...
+---
+### Exkurs: Intersection und Union Types
+
+* Ein _Intersection Type_ stellt eine "Überschneidung" aus zwei Typen dar.
+* ```typescript
+    type Person = { firstname: string; age: number }
+    type Address = { city: string; street: string }
+
+    type PersonWithAddress = Person & Address; // Intersection type
+  ```
+* Da der Typ `PersonWithAddress` die Gemeinsamkeiten von `Person` und `Address` darstellt, müssen auch alle Eigenschaften beim Instaniieren des Typs angegeben werden:
+* ```typescript
+  const p: PersonWithAddress = { 
+    firstname: "Klaus", age: 32,
+    city: "Hamburg", street: "Reeperbahn"
+   };
+  ```
+* Der Verwender dieses Typs kann sich dann aber darauf verlassen, alle Eigenschaften von `Person` _und_ `Address` zu haben:
+* ```typescript
+  function sendLetter(p: PersonWithAddress) {
+    p.firstname.toUpperCase(); // OK
+    p.city.toUpperCase(); // OK
+  }
+  ```
+* Bei einem _Union Typen_ ist es genau andersrum.
+---
+### Exkurs: Intersection und Union Types
+* Ein _Union Type_ enthält die Eigenschaften aus dem einen _oder_ dem anderen Typen:
+* ```typescript
+  type Person = { firstname: string; age: number }
+  type Animal = { name: string; species: string }
+
+  type PersonOrAnimal = Person | Animal;
+  ```
+* Um ein `PersonOrAnimal` zu erzeugen, reicht es, die Eigenschaften von `Person` _oder_ `Animal` anzugeben:
+* ```typescript
+  type klaus: PersonOrAnimal = { firstname: "Klaus", age: 32 };
+  ```
+* Der Verwender kann sich dann nicht sicher sein, welche Eigenschaften er hat (`Person`, `Animal` oder beide), und muss einen entsprechenden _Type Guard_ prüfen, welche Ausprägung vorliet:
+* ```typescript
+  function sayHello(p: PersonOrAnimal) {
+    p.firstname.toUpperCase(); // ERROR: Property 'firstname' does not exist on type 'PersonOrAnimal'.
+                               //     Property 'firstname' does not exist on type 'Animal'
+
+    if ("firstname" in p) {
+      p.firstname.toUpperCase(); // OK
+        // p = Person  
+    }                               
+  }
+
+  ```
+---
+### Exkurs: Intersection und Union Types
+* Was passiert nun, wenn beide Typen kombiniert werden? 🙀
+* ```typescript
+  type ColorsOfFrance = "blue" | "white" | "red"
+  type ColorsOfSwiss = "red" | "white";
+
+  type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
+         // ^? ???
+  ```
+* Richtig ist die Schnittmenge der Farben:
+  * ```typescript
+    type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
+            // ^? "red" | "white"
+    ```
+  * Wenn es nicht die Schnittmenge wäre, sondern die Menge aller Ausprägungen aller Union Typen (`"blue" | "white" | "red"`), könnten wir einen Typen 
+erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:   
+  * ```typescript
+  type AllColorsOfSwissAndFrance = "blue" | "white" | "red";
+  const c: AllColorsOfSwissAndFrance = "blue";
+  const f: ColorsOfFrance = c; // OK
+  const s: ColorsOfSwiss = c; // ERR Type '"blue"' is not assignable to type 'ColorsOfSwiss'
+  ```
+---
+### Exkurs: Intersection und Union Types
+* Was passiert, wenn diese beide Typen kombiniert werden? 🙀
+* ```typescript
+  type StringOrNum = string | number;
+  type StringOrBoolean = string | boolean
+  type StringOrNumAndStringOrBoolean = StringOrNum & StringOrBoolean
+         // ^? ???
+  ```
+  * Ebenfalls die Schnittmenge, gleicher Fall wie vorher nur mit anderen Typen:
+* ```typescript
+  type StringOrNumAndString = StringOrNum & string
+  type StringOrNumAndStringOrBoolean = StringOrNum & StringOrBoolean
+        // ^? string
+```
+* Und nun die Keys aus unserem `Person`-Objekt:
+* ```typescript
+  type Person = { firstname: string, 2: [Symbol()]: "geheim" }
+
+  type KeysOfPerson = keyof Person; 
+         
+  type KeysOfPersonAndString = KeysOfPerson & string
+         // ^? ???
+  ```
+  * Ebenfalls selbes Prinzip, nur das der Union Typ diesmal aus `keyof` kommt:
+    * ```typescript
+      type KeysOfPerson = keyof Person; 
+        // ^?  "firstname" | 2 | symbol;
+
+      type KeysOfPersonAndString = KeysOfPerson & string
+        // ^? "firstname"
+      ```
+
+
+---
+###  Keys mit Template Literal Types umbenennen
 * Alle Keys die nicht vom Typ `string` sind, werden damit rausgefiltert und sind im neuen Objekt nicht vorhanden.
-  * Ob das richtig ist, ist eine fachliche Frage
 * ```typescript
   type SetterObject<O extends object> = {
-    [Key in StringKeysOf<O> as `set${Capitalize<Key>}`]: (newValue: O[K]) => void;
+    [Key in keyof O & string as `set${Capitalize<Key>}`]: (newValue: O[Key]) => void;
   }
   ```
   
@@ -1019,16 +1186,49 @@ type X2 = {
   setters.setFirstname("Moni"); // ✅
   setter.firstname("Moni"); // ❌
   ```
-  
+* Ob das Entfernen der nicht-String-Keys korrekt ist, ist eine fachliche Frage
+  * Was könnten wir stattdessen? 🤔 
+
+---
+### Conditional Types mit Template Literal Types
+
+
 
 ---
 ### Übung: Template Literal Types
 
 - Übung Keys umbenennen (zeige ich allerdings auch schon...)
-- mit infer: Teams parsen (HSV:St.Pauli). Fachlicher Nutzen?
+- mit infer: String parsen (vordergrund:hintergrundFarbe)
 ---
 ### Ausblick (?) Template Literal Types mit infer
 - evtl. schon vorher
+
+---
+### Übung Template Literal Types mit infer
+* ```typescript
+// IDEE 1:
+type ToReactClassName<C extends string> =
+  C extends `${infer left extends Spacing}-${infer right extends Direction}` ?
+  `${left}${Capitalize<right>}` : never;
+
+declare function toReactClassName<C extends string>(c: C): ToReactClassName<C>;
+const result = toReactClassName("margin-bottom");
+// ^? "marginBottom"
+const invalidResult = toReactClassName("background-color" );
+// ^? never
+
+// IDEE 2: 
+type ToCamelCase<C extends string> =
+  C extends `${infer left}-${infer right}` ?
+  `${left}${Capitalize<right>}` : never;
+
+  declare function toCamelCase<C extends string>(c: C): ToCamelCase<C>;
+  const cc = toCamelCase("margin-bottom");
+  // ^? "marginBottom"
+  const invalidCc = toCamelCase("background-color" );
+  // ^? backgroundColor
+  ```
+
 
 
 

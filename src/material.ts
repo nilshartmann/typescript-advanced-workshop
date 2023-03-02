@@ -377,7 +377,7 @@ function keyoftest() {
 
   type SetterObject<O extends object> = {
     [Key in StringKeysOf<O> as `set${Capitalize<Key>}`]: (
-      newValue: O[K]
+      newValue: O[Key]
     ) => void;
   };
 
@@ -397,6 +397,28 @@ function keyoftest() {
   >}Change`;
 }
 
+function dasdfasdf() {
+  type Person = { firstname: string; age: number };
+  type Animal = { name: string; species: string };
+  type PersonOrAnimal = Person | Animal;
+
+  function sayHello(p: PersonOrAnimal) {
+    if ("firstname" in p) {
+      p.firstname.toUpperCase(); // OK
+      //^? Person
+    }
+  }
+}
+
+function afasdfasfasdfasdfasdf() {
+  type StringOrNum = string | number;
+  type StringOrNumAndString = StringOrNum & string;
+
+  type ColorsOfSwiss = "red" | "white";
+  type ColorsOfFrance = "blue" | "white" | "red";
+  type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance;
+}
+
 function aaaa() {
   const person = {
     firstname: "Klaus",
@@ -405,6 +427,8 @@ function aaaa() {
   };
 
   type P = typeof person;
+  type Keysx = keyof P;
+  type KKKKKK = Keysx & string;
 
   type Keys<O> = {
     [K in keyof O]: K;
@@ -417,6 +441,95 @@ function aaaa() {
     [K in keyof O as `${K}`]: boolean;
   };
 
+  type Neu = NeuerName<P>;
+
   type NN<X extends string | number | bigint | boolean | null | undefined> =
-    `${Capitalize<X>}`;
+    `${X}`;
+
+  type AAA = `${4}`;
+
+  type Things = 4 | true | "Hello" | "123";
+
+  type Things2 = 5 | false | "Hello";
+
+  type AllThings = Things & Things2;
+
+  type ThingsString = Things & string;
+
+  type A = {
+    a: string;
+  };
+
+  type B = {
+    a: number;
+  };
+
+  type C = A & B;
+  const c: C = null as any as C;
+
+  const a: A = c;
+  const b: B = c;
 }
+type Animal = "lion" | "tiger";
+type Domestic = "bee" | "cow";
+type DomesticAnimal = Animal & Domestic;
+
+type AllColorsOfSwissAndFrance = "blue" | "white" | "red";
+const c: AllColorsOfSwissAndFrance = "blue";
+const f: ColorsOfFrance = c; // OK
+const s: ColorsOfSwiss = c;
+type ColorsOfFrance = "blue" | "white" | "red";
+type ColorsOfSwiss = "red" | "white";
+
+type SetterObject<O extends object> = {
+  [Key in keyof O & string as `set${Capitalize<Key>}`]: (
+    newValue: O[Key]
+  ) => void;
+};
+
+type X = SetterObject<Person>;
+
+function fasdfasdfasfasdfasdf() {
+  type Color = "red";
+  type Msg = `My favorite color: ${Color}`;
+
+  function say(m: Msg) { /* ... */ }
+  say("My favorite color: red"); // OK
+  say("My favorite color: black"); // ERR: Argument of type '"My favorite color: black"' is not assignable 
+                                   //   to parameter of type '"My favorite color: red"
+  
+  
+  function fasfsdfähioafre() {
+    type Spacing = "margin" | "padding";
+    type Direction = "top" | "right" | "bottom" | "left";
+
+    type CSSClassNames = `${Spacing}-${Direction}`;
+
+    declare function setCssClass(c: CSSClassNames): void;
+    setCssClass("margin-right");  // OK
+    setCssClass("padding-center"); // ERROR
+
+    // IDEE 1:
+    type ToReactClassName<C extends string> =
+      C extends `${infer left extends Spacing}-${infer right extends Direction}` ?
+      `${left}${Capitalize<right>}` : never;
+    
+    declare function toReactClassName<C extends string>(c: C): ToReactClassName<C>;
+    const result = toReactClassName("margin-bottom");
+    // ^? "marginBottom"
+    const invalidResult = toReactClassName("background-color" );
+    // ^? never
+
+    // IDEE 2: 
+    type ToCamelCase<C extends string> =
+      C extends `${infer left}-${infer right}` ?
+      `${left}${Capitalize<right>}` : never;
+
+      declare function toCamelCase<C extends string>(c: C): ToCamelCase<C>;
+      const cc = toCamelCase("margin-bottom");
+      // ^? "marginBottom"
+      const invalidCc = toCamelCase("background-color" );
+      // ^? backgroundColor
+  
+
+  }  
