@@ -340,3 +340,83 @@ function x() {
   type T3 = NotNullOrUndefined<string | null>; // T1 = string
   type T4 = NotNullOrUndefined<string | boolean | null | undefined>; // T2 = string | boolean | undefined
 }
+
+function st() {
+  type Mouse = {
+    position: [number, number];
+    leftButtonState: boolean;
+    rightButtonState: boolean;
+  };
+
+  type MouseEventName<O extends object> = `on${Capitalize<keyof O>}Change`;
+  // Here R is a inferred type
+  type MouseEventKey<T> = T extends `on${infer R}Change`
+    ? Uncapitalize<R>
+    : never;
+}
+
+function keyoftest() {
+  const person = {
+    B: "b",
+    firstname: "...",
+    2: "zwei",
+    [Symbol()]: "geheim",
+  };
+
+  type Abc = "A" | "B";
+  type OhneB<X> = X extends "B" ? never : X;
+  type Ab = OhneB<keyof typeof person>;
+
+  type StringKeysOf2<T> = T extends string ? string : never;
+  type StringKeysOf<T extends object, K = keyof T> = K extends string
+    ? K
+    : never;
+  type StringKeysOfA<T extends object> = [keyof T] extends [string]
+    ? true
+    : never;
+
+  type SetterObject<O extends object> = {
+    [Key in StringKeysOf<O> as `set${Capitalize<Key>}`]: (
+      newValue: O[K]
+    ) => void;
+  };
+
+  type XXXX = SetterObject<P>;
+
+  type P = typeof person;
+  type PKeys = StringKeysOf<P>;
+  type YKeys = StringKeysOf2<keyof P>;
+  type ZKeys = StringKeysOfA<P>;
+
+  type X = {
+    [K in StringKeysOf<P> as `on${Capitalize<K>}Change`]: boolean;
+  };
+
+  type MouseEventName<O extends object> = `on${Capitalize<
+    StringKeysOf<O>
+  >}Change`;
+}
+
+function aaaa() {
+  const person = {
+    firstname: "Klaus",
+    2: "zwei",
+    [Symbol()]: "geheim",
+  };
+
+  type P = typeof person;
+
+  type Keys<O> = {
+    [K in keyof O]: K;
+  };
+
+  type PKeys = Keys<P>;
+  type RKeys = Keys<Record<string, string>>;
+
+  type NeuerName<O extends object> = {
+    [K in keyof O as `${K}`]: boolean;
+  };
+
+  type NN<X extends string | number | bigint | boolean | null | undefined> =
+    `${Capitalize<X>}`;
+}

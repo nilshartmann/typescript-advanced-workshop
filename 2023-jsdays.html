@@ -947,15 +947,87 @@ type X2 = {
 - Wie könnte man dem Benutzer eine sprechende Fehlermeldung (statt never) geben
 
 ---
-### String Template Literal
+### Template Literal Types
+- [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
+<!-- .element: class="todo" -->
+---
+### Keys mit Template Literal Types umbenennen
+<!-- .element: class="todo" -->eventuell auf createObservable umstellen, auf dem man Listener für die Felder registrieren kann
+- Wenn ihr einen Key in einem Mapped Type umbenennen wollt, könnt ihr das mit einem Template Literal Type tun
+* Fachliches Beispiel:
+  - Die schon gesehene `createSetter`-Funktion liefert Setter-Funktionen für ein ganzes Objekt (`observedObject`) zurück
+  - Dazu gibt `createSetter` ein Objekt zurück, in dem für jedes Feld in `observedObject` eine Setter-Funktion enthalten ist
+  - Die Keys im `setter`-Objekt heissen allerdings `setFieldname` und nicht `fieldname`:
+  * ```typescript
+    function createSetter(observedObject) { /* ... */ }
+    const setters = createSetter( { firstname: "klaus", age: 32} ) ;
+           // setters: { setFirstname(newValue) { /* ... */ }, setAge(newValue) { /* ... */ } }
+    // Ändern des Vornamens:
+    setters.setFirstname("Moni");
+    ```
+* 👉 Der zurückgelieferte Typ muss also die Keys aus dem `observedObject` umbenennen.
+  * Wir brauchen konzeptionell also so etwas:
+  * ```typescript
+    type SetterObject<O extends object> = {
+      [Key in keyof O]: (newValue: O[K]) => void;
+      // ^-- Hier muss Key umbenannt werden in `set${Capitalize<Key>}`
+    }
+    ```
+---
+### Keys mit Template Literal Types umbenennen
+
+* Grundsätzlich können bei Mapped Types die Keys umbenannt werden
+* Zur Erinnerung: `keyof` liefert eine Liste von _Typen_ zurück (auch wenn diese meist wie "normale" Strings aussehen):
+* ```typescript
+  type KeysInPerson = keyof Person; // "firstname" | "age"
+                                          ^------------^---- Typen! Keine Werte! Keine Strings!
+  ```
+* Um einem Key einen neuen Namen zu ändern, müssen wir also dessen _Typ_ verändern
+* Das kann man mit einem Type Cast (`as`) machen
+* In Kombination mit einem Template Listeral Type zum Beispiel so
+  * ```typescript
+    // Achtung! Beispiel funktioniert so noch NICHT
+    type SetterObject<O extends object> = {
+      [Key in keyof O as `set${Capitalize<Key>}`]: (newValue: O[K]) => void;
+    }
+    ```
+* Das funktioniert aber so noch nicht!
+* Es gibt einen Compile-Fehler
 
 ---
-### Übung: String Template Literal
+###  Keys mit Template Literal Types umbenennen
+* Einem Template Literal Type kann nur ein `string` übergeben werden.
+* Der Union Typ von `keyof` liefert aber auch z.B. `number` oder `symbol` zurück, weil diese als Keys an Objekten verwendet werden können
+* Wir müssen also die Typen aus `keyof` rausfiltern, die keine Strings sind
+* Wie könnten wir das mit einem Union Type und `never` machen? 🤔
+* ```typescript
+  type StringKeysOf<O extends object, K = keyof O> = K extends string ? K : never
+  ```
+* Alle Keys die nicht vom Typ `string` sind, werden damit rausgefiltert und sind im neuen Objekt nicht vorhanden.
+  * Ob das richtig ist, ist eine fachliche Frage
+* ```typescript
+  type SetterObject<O extends object> = {
+    [Key in StringKeysOf<O> as `set${Capitalize<Key>}`]: (newValue: O[K]) => void;
+  }
+  ```
+  
+* ```typescript
+  declare function createSetter<O extends object>(o: O): SetterObject<O>;
+
+  const setters = createSetter( { firstname: "klaus", age: 32} ) ;
+  // Ändern des Vornamens:
+  setters.setFirstname("Moni"); // ✅
+  setter.firstname("Moni"); // ❌
+  ```
+  
+
+---
+### Übung: Template Literal Types
 
 - Übung Keys umbenennen (zeige ich allerdings auch schon...)
-- 
+- mit infer: Teams parsen (HSV:St.Pauli). Fachlicher Nutzen?
 ---
-### Ausblick (?) String Template Literal mit infer
+### Ausblick (?) Template Literal Types mit infer
 - evtl. schon vorher
 
 
