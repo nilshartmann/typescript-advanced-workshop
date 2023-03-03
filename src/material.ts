@@ -493,43 +493,142 @@ function fasdfasdfasfasdfasdf() {
   type Color = "red";
   type Msg = `My favorite color: ${Color}`;
 
-  function say(m: Msg) { /* ... */ }
+  function say(m: Msg) {
+    /* ... */
+  }
   say("My favorite color: red"); // OK
-  say("My favorite color: black"); // ERR: Argument of type '"My favorite color: black"' is not assignable 
-                                   //   to parameter of type '"My favorite color: red"
-  
-  
-  function fasfsdfähioafre() {
-    type Spacing = "margin" | "padding";
-    type Direction = "top" | "right" | "bottom" | "left";
+  say("My favorite color: black"); // ERR: Argument of type '"My favorite color: black"' is not assignable
+  //   to parameter of type '"My favorite color: red"
+}
 
-    type CSSClassNames = `${Spacing}-${Direction}`;
+function fasfsdfähioafre() {
+  type Spacing = "margin" | "padding";
+  type Direction = "top" | "right" | "bottom" | "left";
 
-    declare function setCssClass(c: CSSClassNames): void;
-    setCssClass("margin-right");  // OK
-    setCssClass("padding-center"); // ERROR
+  type CSSClassNames = `${Spacing}-${Direction}`;
 
-    // IDEE 1:
-    type ToReactClassName<C extends string> =
-      C extends `${infer left extends Spacing}-${infer right extends Direction}` ?
-      `${left}${Capitalize<right>}` : never;
-    
-    declare function toReactClassName<C extends string>(c: C): ToReactClassName<C>;
-    const result = toReactClassName("margin-bottom");
-    // ^? "marginBottom"
-    const invalidResult = toReactClassName("background-color" );
-    // ^? never
+  declare function setCssClass(c: CSSClassNames): void;
+  setCssClass("margin-right"); // OK
+  setCssClass("padding-center"); // ERROR
 
-    // IDEE 2: 
-    type ToCamelCase<C extends string> =
-      C extends `${infer left}-${infer right}` ?
-      `${left}${Capitalize<right>}` : never;
+  // IDEE 1:
+  type ToReactClassName<C extends string> =
+    C extends `${infer left extends Spacing}-${infer right extends Direction}`
+      ? `${left}${Capitalize<right>}`
+      : never;
 
-      declare function toCamelCase<C extends string>(c: C): ToCamelCase<C>;
-      const cc = toCamelCase("margin-bottom");
-      // ^? "marginBottom"
-      const invalidCc = toCamelCase("background-color" );
-      // ^? backgroundColor
-  
+  declare function toReactClassName<C extends string>(
+    c: C
+  ): ToReactClassName<C>;
+  const result = toReactClassName("margin-bottom");
+  // ^? "marginBottom"
+  const invalidResult = toReactClassName("background-color");
+  // ^? never
 
-  }  
+  // IDEE 2:
+  type ToCamelCase<C extends string> = C extends `${infer left}-${infer right}`
+    ? `${left}${Capitalize<right>}`
+    : never;
+
+  declare function toCamelCase<C extends string>(c: C): ToCamelCase<C>;
+  const cc = toCamelCase("margin-bottom");
+  // ^? "marginBottom"
+  const invalidCc = toCamelCase("background-color");
+  // ^? backgroundColor
+}
+
+function cssa() {
+  type Unit = "em" | "px" | "rem";
+  type X = `${number}${Unit}`;
+
+  const s: X = "2em";
+  const t: X = "2rem";
+  const y: X = "2 x"; //
+
+  type RGB = `rgb(${number},${number},${number})`;
+  type HEX = `{"0" | "1" "1" | "A" | "B" | "C" | "D" | "E" | "F"}`;
+  type HEX_COLOR = `#${HEX}`;
+
+  const h: HEX = "#1A";
+}
+
+declare function sayHello(name: string): string | null;
+type Fn = typeof sayHello;
+
+const languages = {
+  de: "DE",
+  en: "EN",
+};
+
+type TLanguages = typeof languages; // TLanguages ist TYPE, languages ist WERT
+//
+type FirstArg<O extends (a: any, ...args: any) => any> = O extends (
+  a: infer A,
+  ...args: any
+) => any
+  ? A
+  : never;
+
+function hurzeppurzel() {
+  type ToCamelCase<S> = S extends `${infer left}-${infer right}`
+    ? ToCamelCase<`${left}${Capitalize<right>}`>
+    : S;
+
+  const ml: ToCamelCase<"margin-left"> = "marginLeft";
+  const mbw: ToCamelCase<"max-border-width"> = "maxBorderWidth";
+  const c: ToCamelCase<"color"> = "color";
+
+  type ToCamelCase2<
+    S,
+    D extends string = "-"
+  > = S extends `${infer left}${D}${infer right}`
+    ? ToCamelCase<`${left}${Capitalize<right>}`>
+    : S;
+
+  const ml2: ToCamelCase2<"margin-left"> = "marginLeft";
+  const helloWorld: ToCamelCase2<"hello world", " "> = "helloWorld";
+}
+
+type ListenerName<E extends string> = `add${E}Listener`;
+type ChangeListenerName = ListenerName<"change">;
+const changeListenerName: ChangeListenerName = "addChangeListener";
+
+function inferTemplateLiteral() {
+  type IsHausnummer<S> = S extends `${number}a` ? true : false;
+  type aaa = IsHausnummer<"41a">;
+
+  type IsAddListenerForEventName<S, E> = S extends `add${Capitalize<E>}Listener`
+    ? true
+    : false;
+
+  type IsChangeListener = IsAddListenerForEventName<
+    "addChangeListener",
+    "change"
+  >; // "true"
+  type IsChangeOrUpdateListener = IsAddListenerForEventName<
+    "addChangeListener",
+    "change" | "update"
+  >; // "true"
+  type IsUpdateListener = IsAddListenerForEventName<
+    "addChangeListener",
+    "update"
+  >; // "false"
+
+  type Event = "change" | "update";
+  type GetEventNameFromListener<S extends string> =
+    S extends `add${infer EN extends Event}Listener` ? Uncapitalize<EN> : never;
+
+  type ChangeEvent = GetEventNameFromListener<"addChangeListener">; // "change"
+  type NoListener = GetEventNameFromListener<"addInsertListener">; // "never"
+  type NoEvent = GetEventNameFromListener<"addChangeHandler">; // never
+}
+
+function infer2() {
+  type Event = "change" | "update";
+  type IsAddListenerForEventName<
+    S extends string,
+    E extends Event = "change"
+  > = S extends `add${Capitalize<E>}Listener` ? true : false;
+  type IsChangeListener = IsAddListenerForEventName<"addChangeListener">; // "true"
+  type IsUpdateListener = IsAddListenerForEventName<"addUpdateListener">; // "false"
+}

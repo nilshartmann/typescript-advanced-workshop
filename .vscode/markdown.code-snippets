@@ -98,6 +98,11 @@
     "prefix": "mdh",
     "body": ["<!-- .slide: data-hidden=\"true\" -->$0"]
   },
+  "Markdown slide left": {
+    "scope": "html",
+    "prefix": "mdl",
+    "body": ["<!-- .slide: class=\"left\" -->$0"]
+  },
   "Markdown Note": {
     "scope": "html",
     "prefix": "mdn",
