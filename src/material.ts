@@ -632,3 +632,65 @@ function infer2() {
   type IsChangeListener = IsAddListenerForEventName<"addChangeListener">; // "true"
   type IsUpdateListener = IsAddListenerForEventName<"addUpdateListener">; // "false"
 }
+
+function Sizes() {
+  type Direction = "top" | "right" | "bottom" | "left";
+  type Size = `${number}${NonEmpty<string>}`;
+
+  type NonEmptyString<T extends string> = "" extends T
+    ? never
+    : T extends never
+    ? never
+    : T;
+
+  type NonEmpty<T extends string> = "" extends T ? never : T;
+
+  type X = NonEmptyString<"s">;
+  type Y = NonEmptyString<"">;
+
+  function setMargin(d: Direction, size: Size): void {}
+
+  setMargin("middle", "2ddd"); // OK
+  setMargin("top", "2"); // ERR
+}
+
+function s2() {
+  type Direction = "top" | "right" | "bottom" | "left";
+  type Unit = "em" | "rem" | "px";
+  // type Size = `${number}em` | `${number}rem` | `${number}px`
+  type Size = `${number}${"em" | "rem" | "px"}`;
+
+  function setMargin(d: Direction, size: Size): void {}
+
+  setMargin("top", "2px"); // OK
+  setMargin("top", "1.5rem"); // OK
+  setMargin("top", "24pt"); // ERR
+  setMargin("top", "2"); // ERR
+}
+
+function spacing() {
+  type Spacing = "margin" | "padding";
+  type Direction = "top" | "right" | "bottom" | "left";
+  type Size = `${number}${"em" | "rem" | "px"}`;
+
+  type CSSClassNames = `${Spacing}-${Direction}`;
+
+  function setSpacing(c: CSSClassNames, size: Size): void {}
+  setSpacing("margin-right", "2rem"); // OK
+  setSpacing("padding-center", "2rem"); // ERROR
+
+  function setX(c: `${CSSClassNames}:${Size}`) {}
+  setX("margin-right: 2rem");
+}
+
+function swap() {
+  type Swap<S extends string> = S extends Capitalize<S>
+    ? Uncapitalize<S>
+    : Capitalize<S>;
+
+  type A = Swap<"addListener">;
+  // ^?  "AddListener"
+
+  type B = Swap<"AddListener">;
+  // ^?  "addListener"
+}

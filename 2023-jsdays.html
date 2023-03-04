@@ -152,6 +152,9 @@
 
 * Wir konzentrieren uns hier nur auf die Typ-Ebene
 * Die gezeigten Beispiele kommen daher ohne Implementierung aus
+* Ich möchte Euch zeigen, wie ihr komplexe Typ-Definitionen schreiben könnt, von denen Verwender Eurer APIs dann profitieren
+  * Die APIs kann man nutzen, ohne viel TypeScript Typen schreiben zu müssen
+  * Verwendung der APIs ist aber trotzdem typsicher
           </textarea>
         </section>
 
@@ -573,14 +576,6 @@ beliebigen Objektes zurückliefern.
       aKey: K
   ): SetterFn<O, K>  
   ```
-
-
----
-### Todo
-<!-- .element: class="todo" -->Beispiele zusammenstellen, die Nils macht  
-<!-- .element: class="todo" -->* Das muss alles inklusive Übung in einer Stunde fertig sein!
-
-
 ---
 ### Mapped Types
 * Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
@@ -743,8 +738,8 @@ beliebigen Objektes zurückliefern.
     ```
 ---
 ### Übung Mapped Types    
-<!-- .element: class="todo" -->Hinweisen: entweder Typ für Validator-Objekt erst bauen, oder die validator-Funktionen beim Aufruf der Methode angeben, sonst kann TS die Argumente nicht ableiten
-<!-- .element: class="todo" -->deswegen erst `ValidatorsObjekt` bauen (lassen)
+* <!-- .element: class="todo" -->Hinweisen: entweder Typ für Validator-Objekt erst bauen, oder die validator-Funktionen beim Aufruf der Methode angeben, sonst kann TS die Argumente nicht ableiten
+* <!-- .element: class="todo" -->deswegen erst `ValidatorsObjekt` bauen (lassen)
 * Die `validate`-Funktion soll zwei Parameter haben:
   1. Das zu validierende Objekt 
   2. Ein Objekt, das Funktionen zum Validieren enthält
@@ -976,6 +971,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ```
 * Erweiterung: wenn eine Eigenschaft eine Funktion ist, die `void` zurückgibt, soll diese Eigenschaft nicht in `ValidatedObject`
   vorkommen (wenn sie keinen Wert zurückliefert, kann sie nicht für die Validierung verwendet werden).
+  * <!-- .element: class="todo" -->Hinweis, wie man keys mit `as never` entfernt
 * ```typescript
   type Person = {
     firstname: string;
@@ -989,87 +985,104 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
     // incrementAge nicht vorhanden, weil Rückgabetyp void
   }
   ```
-<!-- .element: class="todo" -->Hinweis, wie man keys mit `as never` entfernt
 
 ---
 ### Template Literal Types
 <!-- .slide: class="left" -->
-* Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein:
+* Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein.
+* Damit können wir zum Beispiele eine Art Aufzählungstyp bauen, um sicherzustellen, dass nur semantisch korrekte Strings
+  an einer Stelle verwendet werden:
 * ```typescript
-  type Color = "red" | "blue";
+  type Direction = "top" | "right" | "bottom" | "left";
 
-  declare function print(msg: string, color: Color): void;
+  declare function setMargin(d: Direction, size: string): void;
 
-  print("Hallo", "red"); // OK
-  print("World", "black") // ERR
+  setMargin("top", "2rem"); // ok
+  setMargin("middle", "2rem"); // ERR: Argument of type '"middle"' is not 
+                               //      assignable to parameter of type 'Direction'
   ```
-
-- Mit einem Template String kannst Du in JavaScript aus einem String einen anderen String erzeugen:
-* ```typescript
-  const color = "red";
-  const msg = `My favorite color: ${color}`; 
-
-  BEISPIELE:
-  username:password
-  email
-  setColor
-  setSpacing
-
-
-  ```
-* Mit einem [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) kannst Du dasselbe auf Typ-Ebene machen:
-<!-- .element: class="todo" -->besseres intro beispiel
-* ```typescript
-  type Color = "red";
-  type Msg = `My favorite color: ${Color}`;
-
-  function say(m: Msg) { /* ... */ }
-  say("My favorite color: red"); // OK
-  say("My favorite color: black"); // ERR: Argument of type '"My favorite color: black"' is not assignable 
-                                   //      to parameter of type '"My favorite color: red"
-  ```
-
+- Hier kann die `setMargin`-Funktion als `d` nur die String-Werte `top`, `right`, `bottom`, oder `left` entgegennehmen.
+- Der zu setzende Wert (`size`) wird als beliebiger String übergeben.
+- Wie können wir sicherstellen, das auch der zweite String nicht beliebig ist, sondern dem Format `Größe + Einheit` enstpricht (`2rem`, `24px`, ...)
 ---
-### Text transformieren
+### Template Literal Types
 <!-- .slide: class="left" -->
-* Ein fachliches Beispiel 
+- Analog zu einem Template String in JavaScript können wir in TypeScript mit einem [Template Literal Type](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) "Regeln" für String-Typen beschreiben.
+- Dazu verwenden statt der Anführungszeichen die Backticks (`` ` ``) und können darin wie in JavaScript mit `${...}` Platzhalter definieren.
+- In die Platzhalter werden dann erlaubte Werte(mengen) eingesetzt.
+- Die Größenanabge für `setMargin` soll sich aus einer Zahl (`number`) und einer Einheit (`string`) zusammensetzen und könnte im ersten Schritt so definiert werden:
 * ```typescript
-  declare function createBorder()
-  ```
+  type Size = `${number}${string}`
 
+  declare function setMargin(d: Direction, size: Size): void;
+
+  setMargin("top", "2rem"); // OK
+  setMargin("top", "XL"); // ERR
+  setMargin("top", "A4"); // ERR
+  setMargin("top", "2"); // OK (Leerstring...)
+  ```
 ---
-### Template Literal Types mit Union Types 
-* Wenn ihr einen Union Type in einem Template Literal einsetzt, enthält der neue Typ alle Kombinationen aller enthalten Union Types:
-* Beispiel: "Font-Size":
+### Template Literal Types
+ 
+* Wie können wir Ausdrücken, dass die Einheit nur `em`, `rem` oder `px` sein darf?  
+* Wir erlauben nicht mehr beliebige, sondern nur noch konkrete Strings:
 * ```typescript
-  type Unit = "em" | "px" | "rem"
+  type Size = `${number}em` | `${number}rem` | `${number}px`
 
-  type FontSize = `${number}${Unit}` 
+  declare function setMargin(d: Direction, size: Size): void;
 
-  declare function setFontSize(fs: FontSize): void;
-
-  setFontSize("1em"); // OK
-  setFontSize("16px"); // OK
-  setFontSize("24pt"); // ERR
+  setMargin("top", "2em"); // OK
+  setMargin("top", "1.5rem"); // OK
+  setMargin("top", "24pt"); // ERR
+  setMargin("top", "2"); // ERR
   ```
+---
+### Template Literal mit Union Types
+ 
+* Der gesehene `Size`-Typ funktioniert, kann bei vielen Ausprägungen aber unübersichtlich werden
+* Wir können stattdessen für die Einheit selbst einen Union Typen verwenden, der die erlaubten Einheiten beschreibt
+* Wenn ihr einen Union Type in einem Template Literal einsetzt, enthält der neue Typ alle Kombinationen aller enthalten Union Types:
+* ```typescript
+  type Unit = "em" | "rem" | "px"
+  type Size = `${number}${Unit}`
+  // oder: 
+  // type Size = `${number}${"em" | "rem" | "px"}`
 
-* Beispiel: CSS Klassen Namen
+  declare function setMargin(d: Direction, size: Size): void;
+
+  setMargin("top", "2em"); // OK
+  setMargin("top", "1.5rem"); // OK
+  setMargin("top", "24pt"); // ERR
+  setMargin("top", "2"); // ERR
+  ```
+---
+### Template Literal mit Union Types
+* Als weiteres Beispiel soll eine Verallgemeinerung von `setMargin` dienen.
+* Diese Funktion soll jetzt  `margin` oder `padding` setzen können.
+* Die Angabe soll dabei (wie in CSS) als String mit Direction erfolgen.
+* Hier können wir zwei Union Types in unser Template Literal einsetzen. 
 * ```typescript
   type Spacing = "margin" | "padding";
   type Direction = "top" | "right" | "bottom" | "left";
-
   type CSSClassNames = `${Spacing}-${Direction}`;
 
-  declare function setCssClass(c: CSSClassNames): void;
-  setCssClass("margin-right");  // OK
-  setCssClass("padding-center"); // ERROR
+  type Size = `${number}${"em" | "rem" | "px"}`
+
+  declare function setSpacing(c: CSSClassNames, size: Size): void;
+
+  setSpacing("margin-right", "2rem");  // OK
+  setSpacing("padding-center", "2rem"); // ERROR
   ```
+* Können wir das so erweitern, dann man einen (mehr oder weniger) kompletten, gültigen CSS-Ausdruck hinschreiben muss, so dass folgendes geht:
+  * `setSpacing("margin-right: 2rem")` ✅
+  * `setSpacing("margin-middle: 2rem")` ❌
+  * `setSpacing("padding-top: 24pt")` ❌
 ---
-### String Manipulation
+### String Manipulation in Template Literal Types
 
 * Nehmen wir an, wir wollen für fiktive Events den Namen ihrer `addListener`-Funktion ermitteln
   * Die `addListener`-Funktion soll den Event-Namen in ihrem Namen tragen
-  * Das könnte folgende Regel sein:
+  * Das könnte folgende Regel auf Wert-Ebene sein:
   * ```typescript
     const changeEvent = "change";
     const changeListenerName = "addChangeListener"
@@ -1090,7 +1103,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ```
 * Wir müssen also den ursprünglichen String manipulieren
 ---
-### String Manipulation
+### String Manipulation in Template Literal Types
 * Um einen String-Typen zu manipulieren, stellt TypeScript [einige Hilfstypen](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html#intrinsic-string-manipulation-types) zur Verfügung:
 * `Uppercase`
 * ```typescript
@@ -1104,6 +1117,10 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 * ```typescript
   type S = Capitalize<"change"> // "Change"
   ```
+* `Uncapitalize`
+* ```typescript
+  type S = Uncapitalize<"Change"> // "change"
+  ```  
 * Damit können wir unseren Typen nun korrekt ausdrücken!
 * ```typescript
   type ListenerName<E extends string> = `add${Capitalize<E>}Listener`;
@@ -1113,15 +1130,60 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 
   const changeListenerName: ChangeListenerName = "addChangeListener" ✅
   ```
+---
+### Übung: Template Literal Types
+<!-- .slide: class="left" -->
+* Übung eventuell für JS Days rausnehmen 
+<!-- .element: class="todo" -->
+* Erweitere den `Spacing` bzw. `CSSClassnames`-Typen, so dass er einem (mehr oder weniger) kompletten, gültigen CSS-Ausdruck entspricht:
+  * `setSpacing("margin-right: 2rem")` ✅
+  * `setSpacing("margin-middle: 2rem")` ❌
+  * `setSpacing("padding-top: 24pt")` ❌
+* Etwas trickreich:
+  * Schreibe einen `SwapCapitalize`-Typen, der einen `string` entgegennimmt 
+    - Wenn der String mit einem Großbuchstaben anfängt, soll der String mit Kleinbuchstaben zurückgeliefert werden, sonst umgekehrt
+  * ```typescript
+    type Swap<S extends string> = "todo";
+
+    type A = Swap<"addListener">;
+      // ^?  "AddListener"
+
+    type B = Swap<"AddListener">;
+      // ^?  "addListener"
+    ```
+* Sehr trickreich:
+  * Kannst Du den `Capitalize`-Typen selbst implementieren? 🤯 🤯 🤯  
+  
+---
+### Lösung: Template Literal Types
+<!-- .slide: class="left" -->
+* CSS Ausdruck:
+* ```typescript
+  type CSSExpression = `${CSSClassNames}:${Size}`
+  function setSpacing(c: CSSExpression) {}
+  setSpacing("margin-right: 2rem"); // OK
+  setSpacing("margin-middle: 2rem"); // ERR
+  setSpacing("padding-top: 24pt"); // ERR
+  ```
+ 
+* Swap
+  * ```typescript
+    type Swap<S extends string> = S extends Capitalize<S> ? Uncapitalize<S> : Capitalize<S>
+
+    type A = Swap<"addListener">;
+      // ^?  "AddListener"
+
+    type B = Swap<"AddListener">;
+      // ^?  "addListener"  
+    ```
 
 ---
 ### Keys mit Template Literal Types umbenennen
-<!-- .element: class="todo" -->auf createObservable umstellen!!!, auf dem man Listener für die Felder registrieren kann (wäre auch bezug zu vorherigem addListener-Beispiel vorhanden)
-- Wenn ihr einen Key in einem Mapped Type umbenennen wollt, könnt ihr das mit einem Template Literal Type tun
+- Wenn ihr einen _Key_ in einem Mapped Type umbenennen wollt, könnt ihr das mit einem Template Literal Type tun
 * Fachliches Beispiel:
-  - Die schon gesehene `createSetter`-Funktion liefert Setter-Funktionen für ein ganzes Objekt (`observedObject`) zurück
-  - Dazu gibt `createSetter` ein Objekt zurück, in dem für jedes Feld in `observedObject` eine Setter-Funktion enthalten ist
-  - Die Keys im `setter`-Objekt heissen allerdings `setFieldname` und nicht `fieldname`:
+  - Die schon gesehene `createSetter`-Funktion liefert Setter-Funktionen für ein ganzes Objekt (`anObject`) zurück
+  - Dazu gibt `createSetter` ein Objekt zurück, in dem für jedes Feld in `anObject` eine Setter-Funktion enthalten ist
+  - Die Keys im `setter`-Objekt sollen nun allerdings `setFieldname` und nicht mehr `fieldname` heissen:
   * ```typescript
     function createSetter(observedObject) { /* ... */ }
     const setters = createSetter( { firstname: "klaus", age: 32} ) ;
@@ -1395,6 +1457,7 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
   ```
 ---
 ### Lösungen
+<!-- .slide: class="left" -->
 * Zwei Wörter, mit Bindestrich getrennt:
   * ```typescript
     type ToCamelCase<S> = S extends `${infer left}-${infer right}`
@@ -1418,7 +1481,11 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
     ```
 ---
 ### todo
-<!-- .element: class="todo" -->Alle Übungen mit Ausgangsmaterial und Lösung als Source-Datei ins Repository!          
+* <!-- .element: class="todo" -->Alle Übungen mit Ausgangsmaterial samt Beschreibung und Lösung als Source-Datei ins Repository!          
+* <!-- .element: class="todo" -->Beispiele zusammenstellen, die Nils macht  
+* <!-- .element: class="todo" -->Zeitplan für JSDays prüfen
+
+
           </textarea>
         </section>
         <section>
