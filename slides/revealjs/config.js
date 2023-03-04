@@ -76,7 +76,8 @@ Reveal.initialize({
     //   n.parentNode.insertBefore(div, n);
     //   div.appendChild(n);
     // });
-
+  } else {
+    // public version
     // li having a code inside, should not have a bullet point (see also styles.css)
     document.querySelectorAll("li > pre.code-wrapper").forEach((n) => {
       n.parentNode.classList.add("no-icon");
@@ -84,8 +85,6 @@ Reveal.initialize({
     document.querySelectorAll("li > img").forEach((n) => {
       n.parentNode.classList.add("no-icon");
     });
-  } else {
-    // public version
 
     if (!isBeta) {
       // remove presenter "demo" marks (children of demo)
