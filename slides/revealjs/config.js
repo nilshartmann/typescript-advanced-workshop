@@ -33,8 +33,10 @@ Reveal.initialize({
   // Learn about plugins: https://revealjs.com/plugins/
   plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
 }).then(() => {
+  const isBeta = !!document.querySelector("[data-beta='true']");
+  console.log("isBeta", isBeta);
+
   document.querySelectorAll("section[data-hidden]").forEach((n) => {
-    console.log("RMEOVE ", n);
     n.remove();
   });
 
@@ -85,10 +87,12 @@ Reveal.initialize({
   } else {
     // public version
 
-    // remove presenter "demo" marks (children of demo)
-    document.querySelectorAll(".demo .demo").forEach((n) => n.remove());
-    // remove todos
-    document.querySelectorAll(".todo").forEach((n) => n.remove());
+    if (!isBeta) {
+      // remove presenter "demo" marks (children of demo)
+      document.querySelectorAll(".demo .demo").forEach((n) => n.remove());
+      // remove todos
+      document.querySelectorAll(".todo").forEach((n) => n.remove());
+    }
   }
 
   // Changes for both public and presenter version
