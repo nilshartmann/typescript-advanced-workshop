@@ -394,7 +394,7 @@ function printTitle(hopefullyAMovie: any) {
 * Das geht für alle möglichen Dinge, auch für Funktionen:
 * ```typescript
   declare function sayHello(name: string): string | null;
-  
+
   type Fn = typeof sayHello;
        // (name: string) => string | null
   ```
@@ -414,7 +414,7 @@ function printTitle(hopefullyAMovie: any) {
     declare function validate(obj: any): any
     ```
 * Was machen wir aber, wenn wir den übergebenen Typen (für `obj`) an anderer Stelle benötigen?
-  * Zum Beispiel, um sicherzustellen, dass der Rückgabe-Typ identisch ist?
+  * Zum Beispiel, um sicherzustellen, dass der Rückgabe-Typ dem Typen eines Parameters entspricht?
 * ```typescript
   const p = validate("hallo"); // p soll string sein (ist: any 😔)
   const n = validate(123); // n soll number sein (ist: any 😔)
@@ -425,22 +425,23 @@ function printTitle(hopefullyAMovie: any) {
 * Für Funktionen (und Typen) können **Typ Variablen** definiert werden
 * Fast wie Funktionsparameter, nur dass keine __Werte__, sondern __Typen__ angegeben werden
 * Die Typ Variable wird deklariert (`<VariablenName>`) und kann dann in der gesamten Funktionssignatur bzw. Typ-Definition verwendet werden
-* Beispiele:
+* Vorheriges Beispiel, jetzt mit Generics und gewünschtem Verhalten:
   * ```typescript
     // "O" ist Typ Variable
+
     declare function validate<O>(o: O): O
     const p = validate("hallo"); // p jetzt string 😊
     const n = validate(123); // n jetzt number 😊
     ```
-* Mehr Beispiele:    
+* Weitere Beispiele
+  * Fachliche Idee: Die Funktion liefert den übergebenen Wert zurück
+    oder "null", falls der Wert ungültig ist (was auch immer "ungültig" hier bedeutet)  
   * ```typescript
-      // Idee liefert den übergebenen Wert zurück, oder
-      // null falls dieser ungültig ist (was auch immer "ungültig" hier bedeutet)  
       declare function validate<O>(o: O): O | null
     ```
+  * Ein Typ, der entweder eine Liste von Dingen ist oder `null`
+    * (fachlich bescheuertes Beispiel, bessere Beispiele folgen...)
   * ```typescript
-      // Ein Typ, der entweder eine Liste von Dingen ist oder null
-      // (fachlich bescheuertes Beispiel, bessere Beispiele folgen...)
       type ListOrNull<O> = Array<O> | null;
     ```
 ---
@@ -485,7 +486,7 @@ function printTitle(hopefullyAMovie: any) {
 ### Generic: Constraints   
 * Wie bei "normalen" Argumente, können die Typ-Argumente Einschränkungen haben:
 * Die Einschränkungen werden mnit `extends` definiert
-  * Der Übergenene Typ muss dann derselbe oder ein erweiterter sein:
+  * Der übergenene Typ muss dann derselbe oder ein davon erweiterter sein:
 * ```typescript
   declare function validateObject<O extends object>(o: O): O | null;
 
@@ -496,6 +497,7 @@ function printTitle(hopefullyAMovie: any) {
   ```
 * ```typescript
   type Person = { firstname: string | null };
+
   declare function getOrDefault<P extends Person>(p: P): P;
 
   getOrDefault( { } ); // ERR: Property 'firstname' is missing in type '{}' 
@@ -508,6 +510,7 @@ function printTitle(hopefullyAMovie: any) {
   der im Union-Typen enthaltenen Typen entsprechen:  
 * ```typescript
   type Color = "red" | "blue" | "green";
+
   declare function bgColor<C extends Color> (c: Color): { backgroundColor: C };
 
   bgColor("red"); // OK
@@ -515,7 +518,8 @@ function printTitle(hopefullyAMovie: any) {
                     // assignable to parameter of type 'Color'
   ```
 * ```typescript
-  type ListOfStringsOrBooleans<X extends string|boolean> = Array<X>
+  type ListOfStringsOrBooleans<X extends string|boolean> = Array<X>;
+
   const c1: ListOfStringsOrBooleans<string> = ["a"]; // Ok
   const c2: ListOfStringsOrBooleans<boolean> = [true]; // Ok
   const c3: ListOfStringsOrBooleans = [true, "jo!"]; // Ok
@@ -787,6 +791,21 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ) => ValidationResult<O>;  
   ```
 
+---
+### Conditional Types
+* Für Konstellationen, in denen ein Typ abhängig von einem anderen verwendet werden, gibt es _Conditional Types_.
+* Dazu ein Beispiel:
+  * Eine Funktion nimmt einen `string` oder `null` entgegen. 
+  * Wenn sie mit `string` aufgerufen wurde, soll sie dessen Länge zurückgeben (`number`)
+  * Wenn sie mit `null` aufgerufen wurde, soll sie `null` zurückliefern
+  * Ganz naiv geht das leider nicht:
+  * ```typescript
+    // So geht's nicht 😢
+    declare function getLength(s: string | null): number | null; 
+
+    const a = getLength("123"); // a: number | null 
+    const b = getLength(null); // b: number | null
+    ```
 
 ---
 ### Conditional Types
@@ -819,76 +838,106 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 ---
 ### Verwendung von Conditional Types
     
-* Beispiel: 
-  * Eine Funktion nimmt einen `string` oder `null` entgegen. 
-  * Wenn sie mit `string` aufgerufen wurde, soll sie dessen Länge zurückgeben (`number`)
-  * Wenn sie mit `null` aufgerufen wurde, soll sie `null` zurückliefern
+* Zurück zu der `getLength`-Funktion: 
   * ```typescript
-    // So geht's nicht 😢
+    // So geht's immer noch nicht 😢
     declare function getLength(s: string | null): number | null; 
-
-    const a = getLength("123"); // a: number | null 
-    const b = getLength(null); // b: number | null
     ```
-* Mit Generics und einem Conditional Type lässt sich das umsetzen: 
+* Mit Generics und einem Conditional Type lässt sich das nun umsetzen: 
 * ```typescript
     declare function getLength<O extends string | null>(s: O): O extends string ? number : null;
 
     const a = getLength("123"); // a: number
     const b = getLength(null); // b: null
   ```
+* Können wir einen `If-Then-Else`-Typen bauen, der uns den Conditional Type verallgemeinert? 🤔
+  * ```typescript
+    type IfThenElse<Current, I, T, E> = Current extends I ? T : E 
 
+    declare function getLength<O extends string | null>(s: O): IfThenElse<O, string, number, null>;
+    ```
 ---
 ### Conditional Types mit Union Types
 
 * Wenn Du einen _Union Type_ übergibst, wird die Überprüfung für jeden Typen aus dem Union Type durchgeführt und ein neuer Union Type zurückgeliefert:
 * ```typescript
   type NumberOrNull<O> = O extends string ? number : null;
-
-  type R = NumberOrNull<string | null | boolean>; 
-    // R = number | null:
-    // string wird zu 'number'
-    // null und boolean werden beide zu 'null'
   ```
 
+* ```typescript
+  type R = NumberOrNull<string | null | boolean>; 
+    // ^? = number | null:
+
+    // - 'string' wird zu 'number'
+    // - 'null' wird null (kein string)
+    // - 'boolean' wird null (kein string)
+  ```
+* Das ist also das gleiche (nur in kompliziert) wie:  
+* ```typescript
+  type R = NumberOrNull<string> | NumberOrNull<null> | NumberOrNull<boolean>;
+  ```
+  
 ---
 ### Conditional Types mit `never`
+* **Ein Beispiel:** eine Funktion, die sicherstellt, dass ein übergebener Wert nicht `null` ist
+  * Wenn der übergebene Wert `null` ist, wirft die Funktion einen Fehler
+  * Wenn der Wert nicht `null` ist, liefert die Funktion den Wert unverändert zurück
+* ```typescript
+  declare function ensureNotNull<O>(o: O): O;
 
+  // oder noch expliziter:
+  declare function ensureNotNull<O>(o: O | null): O;
+  ```
+  
+* In diesem Fall ist die Menge der potentiellen Rückgabe-Typen also _kleiner_ als die Menge der Eingabe-Typen:
+  - während als Eingabe _alle_ möglichen Typen erlaubt sind,
+  - sind als Rückgabe-Typen alle möglichen Typen _bis auf `null`_ möglich
+* Dazu müssen wir den `null`-Typen herausfiltern. Das können wir mit `never` machen.
+---
+### Conditional Types mit `never`
 * Wenn `never` in einem _Union Type_ vorkommt, wird dieser Typ "herausgefiltert"
 * ```typescript
   type X = string | boolean | never; // X = string | boolean
   ```
 * Das kanst Du nutzen, um mit einem Conditional Type aus einer Liste von Typen welche herauszufiltern
 * ```typescript
-  type NotNull<O> = O extends null ? never : O
+  type NotNull<O> = O extends null ? never : O;
+
   type T = NotNull<string>; T = string
   type T1 = NotNull<string | null>; // T1 = string
   type T2 = NotNull<string | boolean | null | undefined>; // T2 = string | boolean | undefined
 
   // Macht hier kein Sinn, aber s. weiteres Beispiel später
-  type TX = NotNull<null>; // T2 = never
+  type TX = NotNull<null>; // TX = never
   ```
-* `extends` kann ebenfalls einen Union Typen aufnehmen:
+* `extends` kann ebenfalls einen Union Typen aufnehmen.
+* Die Bedigungt ist dann wahr, wenn der geprüfte Typ _einem_ der in `extends` angegebenen Typen entspricht:
+
 * ```typescript
   type NotNullOrUndefined<O> = O extends null | undefined ? never : O
-  type T3 = NotNullOrUndefined<string | null>; // T3 = string
-  type T4 = NotNullOrUndefined<string | boolean | undefined>; // T4 = string | boolean
+
+  type T3 = NotNullOrUndefined<string>; // T3 = string  
+  type T4 = NotNullOrUndefined<string | null>; // T4 = string
+  type T5 = NotNullOrUndefined<string | boolean | undefined>; // T5 = string | boolean
   ```
 ---
 ### Conditional Types mit `never`
-* Fachliches Beispiel: eine Funktion, die sicherstellt, dass ein Wert nicht null ist
-* Wenn der übergebene Wert `null` ist, wirft die Funktion zum Beispiel einen Fehler
-* Wenn der Wert nicht `null` ist, liefert die Funktion den Wert unverändert zurück
+
+* Damit können wir auch für die `ensureNotNull` korrekte Typen hinschreiben: 
 * ```typescript
   type NotNull<O> = O extends null ? never : O
+
   declare function ensureNotNull<O>(o: O): NotNull<O>;
 
-  const c = ensureNotNull("huhu"); // c = string
+  const c = ensureNotNull("huhu"); 
+     // ^? string
 
-  // hier macht 'never' jetzt Sinn, da die Funktion 
-  // tatsächlich nie zurückkommt
-  const b = ensureNotNull(null); // b = never
+  // hier macht 'never' Sinn, da die Funktion hier nicht zurückkommt:
+  const b = ensureNotNull(null); 
+     // ^? never
+
   ```
+
 ---
 ### Type Inference mit Conditional Types
 
@@ -1026,17 +1075,17 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 ### Template Literal Types
  
 * Wie können wir Ausdrücken, dass die Einheit nur `em`, `rem` oder `px` sein darf?  
-* Wir erlauben nicht mehr beliebige, sondern nur noch konkrete Strings:
-* ```typescript
-  type Size = `${number}em` | `${number}rem` | `${number}px`
+  * Wir erlauben nicht mehr beliebige String mit `${string}`, sondern schreiben explizit die erlaubten Strings hin:
+  * ```typescript
+    type Size = `${number}em` | `${number}rem` | `${number}px`
 
-  declare function setMargin(d: Direction, size: Size): void;
+    declare function setMargin(d: Direction, size: Size): void;
 
-  setMargin("top", "2em"); // OK
-  setMargin("top", "1.5rem"); // OK
-  setMargin("top", "24pt"); // ERR
-  setMargin("top", "2"); // ERR
-  ```
+    setMargin("top", "2em"); // OK
+    setMargin("top", "1.5rem"); // OK
+    setMargin("top", "24pt"); // ERR
+    setMargin("top", "2"); // ERR
+    ```
 ---
 ### Template Literal mit Union Types
  
@@ -1282,12 +1331,17 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 * Der Verwender kann sich dann nicht sicher sein, welche Eigenschaften er hat (`Person`, `Animal` oder beide), und muss einen entsprechenden _Type Guard_ prüfen, welche Ausprägung vorliet:
 * ```typescript
   function sayHello(p: PersonOrAnimal) {
+
+    // p ist hier Person | Animal
+
     p.firstname.toUpperCase(); // ERROR: Property 'firstname' does not exist on type 'PersonOrAnimal'.
-                               //     Property 'firstname' does not exist on type 'Animal'
+                               //         Property 'firstname' does not exist on type 'Animal'
 
     if ("firstname" in p) {
+
+      // p ist hier nun Person  
       p.firstname.toUpperCase(); // OK
-        // p = Person  
+        
     }                               
   }
 
@@ -1302,7 +1356,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
          // ^? ???
   ```
-* Richtig ist die Schnittmenge der Farben:
+* Richtig ist die gemeinsame _Schnittmenge_ der Farben:
   * ```typescript
     type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
             // ^? "red" | "white"
@@ -1327,6 +1381,7 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
   * Ebenfalls die Schnittmenge, gleicher Fall wie vorher nur mit anderen Typen:
 * ```typescript
   type StringOrNumAndString = StringOrNum & string
+        // ^? string
   type StringOrNumAndStringOrBoolean = StringOrNum & StringOrBoolean
         // ^? string
 ```
@@ -1367,13 +1422,12 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
   setter.firstname("Moni"); // ❌
   ```
 * Ob das Entfernen der nicht-String-Keys korrekt ist, ist eine fachliche Frage
-  * Was könnten wir stattdessen? 🤔 
+  * Was könnten wir stattdessen tun? 🤔 
 
 ---
 ### Übung: Template Literal Types
-<!-- .element: class="todo" -->
-<!-- .element: class="todo" -->JS Days: lange Herleitung mit Union und Intersection Type evtl. raus, einfach nur auf `&` hinweisen
-<!-- .element: class="todo" -->Dann hier eine Übung, die mit dem Validator-Funktion erweitert (z.B. Keys im ValidatedObject sollen anders heißen)
+* <!-- .element: class="todo" -->JS Days: lange Herleitung mit Union und Intersection Type evtl. raus, einfach nur auf `&` hinweisen
+* <!-- .element: class="todo" -->Dann hier eine Übung, die mit dem Validator-Funktion erweitert (z.B. Keys im ValidatedObject sollen anders heißen)
 
 ---
 ### Conditional Types mit Template Literal Types
@@ -1383,8 +1437,8 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
 * ```typescript
   type IsAddListenerName<S> = S extends `add${string}Listener` ? true : false;
 
-  type IsChangeListener = IsAddListenerName<"addChangeListener">; // "true"
-  type IsUpdateListener = IsAddListenerName<"updateListener">; // "false"
+  type IsChangeListener = IsAddListenerName<"addChangeListener">; // true
+  type IsUpdateListener = IsAddListenerName<"updateListener">; // false
   ```
 * Das `${string}` matched auf einen beliebigen String (gleiches geht mit `${boolean}` oder `${number}`)
 * Es können auch Platzhalter übergeben werden:
@@ -1399,14 +1453,14 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
 * ```typescript
   type Event = "change" | "update";
   type IsAddListenerForEventName<S extends string, E extends Event> = 
-                          S extends `add${Capitalize<E>}Listener` ? true : false;
+                                     S extends `add${Capitalize<E>}Listener` ? true : false;
   // Verwendung wie oben
   ```
 * ...oder mit Defaults:
 * ```typescript
   type Event = "change" | "update";
   type IsAddListenerForEventName<S extends string, E extends Event = "change"> = 
-                          S extends `add${Capitalize<E>}Listener` ? true : false;
+                                     S extends `add${Capitalize<E>}Listener` ? true : false;
   type IsChangeListener = IsAddListenerForEventName<"addChangeListener">; // "true"
   type IsUpdateListener = IsAddListenerForEventName<"addUpdateListener">; // "false"
     ```
@@ -1441,20 +1495,20 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
   * ```typescript
     type CamelCase<S extends S> = /* ... */
     
-    const marginLeft:CamelCase<"margin-left">  = "marginLeft";
-    const paddingRight:CamelCase<"padding-right">  = "paddingRight";
+    const marginLeft:CamelCase<"margin-left"> = "marginLeft"; ✅
+    const paddingRight:CamelCase<"padding-right"> = "paddingRight"; ✅
+    const paddingTop:CamelCase<"paddingTop"> = "paddingTop"; ✅ // (alternativ: never)
     ```
 * Erweiterung 1: Kannst Du den Typen so bauen, dass er aus beliebig vielen Wörtern camelCase erzeugt?
 * ```typescript
-    const background:CamelCase<"background"> = "background";
-    const marginLeft:CamelCase<"margin-left"> = "marginLeft";
-    const maxPageWidth:CamelCase<"max-page-width"> = "maxPageWidth";
+    const background:CamelCase<"background"> = "background"; ✅
+    const marginLeft:CamelCase<"margin-left"> = "marginLeft"; ✅
+    const maxPageWidth:CamelCase<"max-page-width"> = "maxPageWidth"; ✅
   ```
 * Erweiterung 2: Kannst Du den Typen so erweitern, dass man das Trennzeichen festlegen kann?  
 * ```typescript
-  const marginLeft:CamelCase<"margin-left", "-"> = "marginLeft";
-  const helloWorld:CamelCase<"hello world", " "> = "helloWorld";
-
+  const marginLeft:CamelCase<"margin-left", "-"> = "marginLeft"; ✅
+  const helloWorld:CamelCase<"hello world", " "> = "helloWorld"; ✅
   ```
 ---
 ### Lösungen

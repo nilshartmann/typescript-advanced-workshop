@@ -694,3 +694,36 @@ function swap() {
   type B = Swap<"AddListener">;
   // ^?  "addListener"
 }
+
+function IfThenElse() {
+  type IfThenElse<Current, I, T, E> = Current extends I ? T : E;
+
+  function getLength<O extends string | null>(
+    s: O
+  ): IfThenElse<O, string, number, null> {
+    return null as any;
+  }
+
+  const a = getLength("123"); // a: number
+  const b = getLength(null); // b: null
+}
+
+function NotNull() {
+  function ensureNotNull<O>(o: O | null): O {
+    return "" as any;
+  }
+
+  ensureNotNull("");
+  ensureNotNull(null);
+
+  type NotNull<O> = O extends null ? never : O;
+  function ensureNotNull2<O>(o: O | null): NotNull<O> {
+    return "" as any;
+  }
+  const a = ensureNotNull2("fasdfasdf");
+  const b: string = ensureNotNull2(null);
+
+  function sayHelslo(s: string) {}
+
+  sayHelslo(b as never);
+}
