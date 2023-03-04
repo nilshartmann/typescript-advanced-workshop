@@ -78,13 +78,6 @@ Reveal.initialize({
     // });
   } else {
     // public version
-    // li having a code inside, should not have a bullet point (see also styles.css)
-    document.querySelectorAll("li > pre.code-wrapper").forEach((n) => {
-      n.parentNode.classList.add("no-icon");
-    });
-    document.querySelectorAll("li > img").forEach((n) => {
-      n.parentNode.classList.add("no-icon");
-    });
 
     if (!isBeta) {
       // remove presenter "demo" marks (children of demo)
@@ -95,6 +88,13 @@ Reveal.initialize({
   }
 
   // Changes for both public and presenter version
+  // li having a code inside, should not have a bullet point (see also styles.css)
+  document.querySelectorAll("li > pre.code-wrapper").forEach((n) => {
+    n.parentNode.classList.add("no-icon");
+  });
+  document.querySelectorAll("li > img").forEach((n) => {
+    n.parentNode.classList.add("no-icon");
+  });
 
   // open all externals link in new tab
   document.querySelectorAll('a:not([href^="#"])').forEach((i) => {
