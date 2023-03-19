@@ -36,10 +36,6 @@ Reveal.initialize({
   const isBeta = !!document.querySelector("[data-beta='true']");
   console.log("isBeta", isBeta);
 
-  document.querySelectorAll("section[data-hidden]").forEach((n) => {
-    n.remove();
-  });
-
   if (isLocalServer) {
     // only applies to presentation version
 

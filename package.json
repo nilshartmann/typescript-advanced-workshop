@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "http-server . -p 3030 -o 2023-jsdays.html"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^4.7.2"
+    "http-server": "^14.1.1",
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "zod": "^3.19.1"

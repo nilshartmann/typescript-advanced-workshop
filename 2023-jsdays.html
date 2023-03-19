@@ -174,35 +174,7 @@
               </code></pre>
         </section> -->
 
-        <section>
-          <h2>Union Types</h2>
-          <p class="todo">evtl. raus für JS Days</p>
-          <p>Variablen, Parameter etc. können mehr als einen Typ annehmen:</p>
-          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
-type Person = { name: string };
-type Movie = { title: string };
-
-function printNameOrTitle(obj: Person | Movie) { 
-
-  console.log(obj.title); // ERR: Property 'title' does not 
-                          // exist on type 'Person | Movie'
- 
-  if ("title" in obj) { // Abfrage ist ein "Type Guard"
-    // obj ist Movie hier, title ist definiert
-    console.log(obj.title);
-  } else {
-    // obj ist Person hier: name ist definiert
-    console.log(obj.name);
-  }
-}
-
-printNameOrTitle({name: "Klaus"}); //OK
-printNameOrTitle({title: "Pulp Fiction"}); //OK
-printNameOrTitle({label: "Save"}); // ERR
-    
-          </code></pre>
-        </section>
-        <section>
+        <!-- <section>
           <h2>Type Guards</h2>
           <p class="todo">evtl. raus für JS Days</p>
           <p>Durch einen Type Guard können Typen "eingeengt" werden</p>
@@ -223,8 +195,8 @@ function printNameOrTitle(obj: Person | Movie) {
 }
     
           </code></pre>
-        </section>
-        <section>
+        </section> -->
+        <!-- <section>
           <h2>Type Assertions</h2>
           <p class="todo">evtl. raus für JS Days</p>
           <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
@@ -247,10 +219,51 @@ function printTitle(hopefullyAMovie: any) {
 }
     
           </code></pre>
-        </section>
+        </section> -->
 
         <section data-markdown>
           <textarea data-template>
+### TypeScript-Code ausprobieren
+* Online im TypeScript Playground: https://www.typescriptlang.org/play
+* In diesem Workspace in `src`-Verzeichnis beliebige TypeScript-Datei anlegen
+  * Dort in die erste Zeile `export default undefined;` schreiben
+  * damit bekommt ihr ein isoliertes Modul und geratet nicht in Namenskonflikte 
+* Bitte achtet darauf, dass ihr TypeScript in der Version 4.9 oder 5.x verwendet:   
+  * Im Playground oben links:            
+    * ![TypeScript Version](./slides/images/screenshot-ts-playground.png)<!-- .element: style="max-width:600px" -->         
+  * Im Workspace:
+    * Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
+    * In Eurer IDE sicherstellen, dass die Version verwendet wird
+---
+### Union Types
+* Variablen, Parameter etc. können mehr als einen Typ annehmen:            
+* ```typescript
+    type Person = { name: string };
+    type Movie = { title: string };
+
+    type PersonOrMovie = Person | Movie;
+
+    function printNameOrTitle(obj: PersonOrMovie) { 
+
+      console.log(obj.title); // ERR: Property 'title' does not 
+                              // exist on type 'Person | Movie'
+    
+      if ("title" in obj) { // Abfrage ist ein "Type Guard"
+        // obj ist Movie hier, title ist definiert
+        console.log(obj.title);
+      } else {
+        // obj ist Person hier: name ist definiert
+        console.log(obj.name);
+      }
+    }
+
+    printNameOrTitle( { name: "Klaus" } ); // OK
+
+    printNameOrTitle( { title: "TypeScript Deep Dive" } ); // OK
+
+    printNameOrTitle( { label: "Save" } ); // ERR
+  ```
+---
 ### Type Aliase
 * Mit dem Schlüsselwort [`type`](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) wird ein __Type Alias__ erzeugt.
 * Ein Type Alias ist nur ein (anderer) Name für einen Typen
@@ -291,7 +304,7 @@ function printTitle(hopefullyAMovie: any) {
 * ```typescript
   const person = {
     firstname: "Klaus",
-    address: { city: "Hamburg", street: Reeperbahn }
+    address: { city: "Hamburg", street: "Reeperbahn" }
   }
 
   const address = person["address"];
@@ -352,8 +365,8 @@ function printTitle(hopefullyAMovie: any) {
 
   ```
 ---
-### String Literal Types
-* Mit einem [String Literal Type]() kannst Du einen Typen definieren, der einen konkreten String darstellt 
+### Literal Types
+* Mit einem [Literal Type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types) kannst Du einen Typen definieren, der einen konkreten String darstellt 
 * ```typescript
   // Beispiel:             
   type Answer = "Yes" | "No" | "I_dont_care";
@@ -370,6 +383,14 @@ function printTitle(hopefullyAMovie: any) {
   fillIn("I_dont_care"); //OK
   fillIn("Maybe"); // ERROR
   ```
+* Das funktioniert auch für number 
+* ```typescript
+  type OneOrZero = 1 | 0;
+  declare function toggleBit(v: OneOrZero): void;
+  toggleBit(1); // OK
+  toggleBit(2); // ERR
+  ```
+ 
 ---
 ### Der typeof-Operator
 
@@ -408,6 +429,9 @@ function printTitle(hopefullyAMovie: any) {
 
 ---
 ### Generics
+* **Beispiel**: eine (JavaScript-)Funktion, die einen beliebigen Wert validiert. Wenn der Wert gültig ist,
+wird er von der Funktion unverändert zurückgegeben, ansonsten wirft die Funktion einen `Error` und kehrt nicht zurück.
+* 
 * Mit `any` können wir Funktionen beschreiben, die alle möglichen Typen entgegennehmen
   und/oder zurückliefern
   * ```typescript
@@ -487,14 +511,16 @@ function printTitle(hopefullyAMovie: any) {
 * Wie bei "normalen" Argumente, können die Typ-Argumente Einschränkungen haben:
 * Die Einschränkungen werden mnit `extends` definiert
   * Der übergenene Typ muss dann derselbe oder ein davon erweiterter sein:
+* Beispiel: beliebiges Objekt erlaubt  
 * ```typescript
   declare function validateObject<O extends object>(o: O): O | null;
 
   validateObject({name: "Klaus"}); // OK
-  validateObject({name: "Klaus"}); // ERR: Argument of type 'string' is not 
+  validateObject("Klaus");         // ERR: Argument of type 'string' is not 
                                    // assignable to parameter of type 'object'
 
   ```
+* Beispiel: nur Objekte mit bestimmter Struktur erlaubt  
 * ```typescript
   type Person = { firstname: string | null };
 
@@ -522,7 +548,7 @@ function printTitle(hopefullyAMovie: any) {
 
   const c1: ListOfStringsOrBooleans<string> = ["a"]; // Ok
   const c2: ListOfStringsOrBooleans<boolean> = [true]; // Ok
-  const c3: ListOfStringsOrBooleans = [true, "jo!"]; // Ok
+  const c3: ListOfStringsOrBooleans<string|boolean> = [true, "jo!"]; // Ok
 
   const c4: ListOfStringsOrBooleans<number> = [4]; // ERR Type 'number' does not satisfy 
                                                    // the constraint 'string | boolean'
@@ -546,41 +572,8 @@ beliebigen Objektes zurückliefern.
     const ageSetter = createSetter({firstname: "Klaus", age: 32}, "firstname");
     ageSetter(33);
     ```
-* In TypeScript sollten dann folgende Beispiele funktionieren bzw. einen Fehler auslösen:
-* ```typescript
-  const person = { firstname: "Klaus", age: 32 }
-
-  createSetter(person, "firstname")("newFirstName"); // OK
-  createSetter(person, "xxx")("newFirstName"); // Argument of type '"xxx"' is not assignable to parameter of type '"firstname" | "age"
-  createSetter(person, "age")(33); // OK
-  createSetter(person, "age")("33"); // ERR // Argument of type 'string' is not assignable to parameter of type 'number'
-  createSetter("Klaus", "klaus"); // Argument of type 'string' is not assignable to parameter of type 'object'
-  ```
----
-### Mögliche Lösungen
-<!-- .slide: class="left" -->
-* ```typescript
-  declare function createSetter<O extends object, K extends keyof O>(
-    someObject: O,
-    aKey: K
-  ): (newValue: O[K]) => void;
-  ```
-* ```typescript
-  type SetterFn<Value> = (newValue: Value) => void
-
-  declare function createSetter<O extends object, K extends keyof O>(
-    someObject: O,
-    aKey: K
-  ): SetterFn<O[K]>
-  ```
-* ```typescript
-  type SetterFn<O extends object, K extends keyof O> = (newValue: O[K]) => void;
-
-  declare function createSetter<O extends object, K extends keyof O>(
-      someObject: O,
-      aKey: K
-  ): SetterFn<O, K>  
-  ```
+* Die Übung kannst Du in `src/210_uebung_generics.ts` machen. Dort findest Du weitere Hinweise.
+* Mögliche Lösungen findest Du in `src/210s_uebung_generics.ts` (`s` wie `solution`)
 ---
 ### Mapped Types
 * Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
@@ -725,23 +718,31 @@ beliebigen Objektes zurückliefern.
 ### Übung Mapped Types:
 
 * Schreibe die Typ-Definitionen für eine weitere Variante der Validation-Funktion!
-  - Der `validate`-Funktion soll nun als zweiten Parameter ein Objekt übergeben entgegen nehmen.
-     - Daran enthalten sind Callback-Funktionen (`ValidatorFn`), in der jeweils die Validierungsregel für ein Property implementiert ist
-  - Die `validate`-Funktion liefert ein Objekt zurück, in dem die Validierungsergebnisse der einzelnen Felder (true/false)
-    enthalten sind
-  - In JavaScript würde das z.B. so aussehen:    
-  * ```typescript
-    function validate(person, validators) { /* ... */ }
+* Der Aufrufer der validate-Funktion muss nun auch ein Objekt mit Validierungsregeln übergeben.
+  * Dieses Objekt soll alle Keys aus dem zu validierenden Objekt enthalten
+  * Diese sind jedoch dann die Validierungsfunktion
+* ```typescript
+    // In JavaScript
+    function validate(anObject, validators) { /* ... */ }
 
-    const person = { firstname: "Mo", age: 32}
-    const personValidators = { 
-      firstname(s) { return s.length > 3 }, // s soll korrekt als 'string' abgeleitet werden
-      age(a) { return age > 0 } // a soll korrekt als 'number' abgeleitet weden
+    const person = {
+      firstname: "Klaus",
+      age: 32
     }
+
+    const personValidators = {
+      firstname(f) { return f.length > 3 },
+      age(a) { return a < 18 }
+    }
+
     const result = validate(person, personValidators);
-          // ^ { firstname: boolean, age: boolean }
-    ```
+    // { firstname: true, age: false }
+  ```
+* In `src/330_uebung_mapped_type.ts` findest Du Ausgangsmaterial mit Hinweisen.
+* Mögliche Lösungen findest Du in `src/330s_uebung_mapped_type.ts`
+* <!-- .element: class="todo" --> Wie lange?
 ---
+<!-- .slide: data-hidden="true" -->
 ### Übung Mapped Types    
 * <!-- .element: class="todo" -->Hinweisen: entweder Typ für Validator-Objekt erst bauen, oder die validator-Funktionen beim Aufruf der Methode angeben, sonst kann TS die Argumente nicht ableiten
 * <!-- .element: class="todo" -->deswegen erst `ValidatorsObjekt` bauen (lassen)
@@ -763,6 +764,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ```
 ---
 ### Mögliche Lösung
+<!-- .slide: data-hidden="true" -->
 <!-- .slide: class="left" -->
 * ```typescript
   // Ein Typ für das Ergebnis der validate-Funktion
@@ -1019,22 +1021,8 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
     hobbies: string[] | null; // 'string[]' ist Rückgabe-Typ von Person.hobbies
   }
   ```
-* Erweiterung: wenn eine Eigenschaft eine Funktion ist, die `void` zurückgibt, soll diese Eigenschaft nicht in `ValidatedObject`
-  vorkommen (wenn sie keinen Wert zurückliefert, kann sie nicht für die Validierung verwendet werden).
-  * <!-- .element: class="todo" -->Hinweis, wie man keys mit `as never` entfernt
-* ```typescript
-  type Person = {
-    firstname: string;
-    hobbies: () => string[]
-    incrementAge(): void;
-  }
-
-  type ValidatedPerson = {
-    firstname: string | null;
-    hobbies: string[] | null; 
-    // incrementAge nicht vorhanden, weil Rückgabetyp void
-  }
-  ```
+* Material findest Du in `src/430_uebung_conditional.ts`
+* Mögliche Lösung in `src/430s_uebung_conditional.ts`
 
 ---
 ### Template Literal Types
@@ -1193,16 +1181,16 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   * Schreibe einen `SwapCapitalize`-Typen, der einen `string` entgegennimmt 
     - Wenn der String mit einem Großbuchstaben anfängt, soll der String mit Kleinbuchstaben zurückgeliefert werden, sonst umgekehrt
   * ```typescript
-    type Swap<S extends string> = "todo";
+    type SwapCapitalize<S extends string> = ???;
 
-    type A = Swap<"addListener">;
+    type A = SwapCapitalize<"addListener">;
       // ^?  "AddListener"
 
-    type B = Swap<"AddListener">;
+    type B = SwapCapitalize<"AddListener">;
       // ^?  "addListener"
     ```
 * Sehr trickreich:
-  * Kannst Du den `Capitalize`-Typen selbst implementieren? 🤯 🤯 🤯  
+  * Kannst Du den `Capitalize`-Typen von TypeScript selbst implementieren? 🤯 🤯 🤯  
   
 ---
 ### Lösung: Template Literal Types
@@ -1536,8 +1524,6 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
     ```
 ---
 ### todo
-* <!-- .element: class="todo" -->Alle Übungen mit Ausgangsmaterial samt Beschreibung und Lösung als Source-Datei ins Repository!          
-* <!-- .element: class="todo" -->Beispiele zusammenstellen, die Nils macht  
 * <!-- .element: class="todo" -->Zeitplan für JSDays prüfen
 
 

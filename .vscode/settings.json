@@ -12,5 +12,6 @@
     "**/node_modules": true,
     "**/*.pdf": true,
     "**/*.pptx": true
-  }
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib"
 }
