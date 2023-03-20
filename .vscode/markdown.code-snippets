@@ -96,7 +96,7 @@
   "Markdown hidden": {
     "scope": "html",
     "prefix": "mdh",
-    "body": ["<!-- .slide: data-hidden=\"true\" -->$0"]
+    "body": ["<!-- .slide: data-visibility=\"hidden\" -->  $0"]
   },
   "Markdown slide left": {
     "scope": "html",
