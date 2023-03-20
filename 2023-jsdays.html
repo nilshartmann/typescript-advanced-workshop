@@ -143,14 +143,32 @@
         -->
 
         <!-- ######################################################  -->
-        <section>
-          <h2>Advanced TypeScript</h2>
-        </section>
         <section data-markdown>
           <textarea data-template>
-### Hinweis!
+### Vorbereitung für Übungen
+* Bitte klont das Repository: https://github.com/nilshartmann/typescript-advanced-workshop
+* Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
+* In Eurer IDE/Editor sicherstellen, dass die Version verwendet wird
+* Die Slides findet ihr im Root-Verzeichnis: `2023-jsdays.html`
+  * Die könnt ihr im Brower öffnen
+* Im `src`-Verzeichnis findet ihr (fast) alle Beispiele aus den Slides auch im Quellcode
+* Wir machen aber gemeinsam Übungen, dann habt ihr Zeit, Dinge selbst auszuprobieren
+---
+### TypeScript ausprobieren
+* Online im TypeScript Playground: https://www.typescriptlang.org/play
+---
+### Übung: Grundlagen
+* Eine kurze Übung zum "warm werden"
+* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
+* Du musst einen Union Typen erzeugen
+* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
+* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
+* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
+* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
+---
+### Advanced TypeScript
 
-* Wir konzentrieren uns hier nur auf die Typ-Ebene
+* Wir konzentrieren uns heute nur auf die Typ-Ebene
 * Die gezeigten Beispiele kommen daher ohne Implementierung aus
 * Ich möchte Euch zeigen, wie ihr komplexe Typ-Definitionen schreiben könnt, von denen Verwender Eurer APIs dann profitieren
   * Die APIs kann man nutzen, ohne viel TypeScript Typen schreiben zu müssen
@@ -223,46 +241,7 @@ function printTitle(hopefullyAMovie: any) {
 
         <section data-markdown>
           <textarea data-template>
-### TypeScript-Code ausprobieren
-* Online im TypeScript Playground: https://www.typescriptlang.org/play
-* In diesem Workspace in `src`-Verzeichnis beliebige TypeScript-Datei anlegen
-  * Dort in die erste Zeile `export default undefined;` schreiben
-  * damit bekommt ihr ein isoliertes Modul und geratet nicht in Namenskonflikte 
-* Bitte achtet darauf, dass ihr TypeScript in der Version 4.9 oder 5.x verwendet:   
-  * Im Playground oben links:            
-    * ![TypeScript Version](./slides/images/screenshot-ts-playground.png)<!-- .element: style="max-width:600px" -->         
-  * Im Workspace:
-    * Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
-    * In Eurer IDE sicherstellen, dass die Version verwendet wird
----
-### Union Types
-* Variablen, Parameter etc. können mehr als einen Typ annehmen:            
-* ```typescript
-    type Person = { name: string };
-    type Movie = { title: string };
-
-    type PersonOrMovie = Person | Movie;
-
-    function printNameOrTitle(obj: PersonOrMovie) { 
-
-      console.log(obj.title); // ERR: Property 'title' does not 
-                              // exist on type 'Person | Movie'
-    
-      if ("title" in obj) { // Abfrage ist ein "Type Guard"
-        // obj ist Movie hier, title ist definiert
-        console.log(obj.title);
-      } else {
-        // obj ist Person hier: name ist definiert
-        console.log(obj.name);
-      }
-    }
-
-    printNameOrTitle( { name: "Klaus" } ); // OK
-
-    printNameOrTitle( { title: "TypeScript Deep Dive" } ); // OK
-
-    printNameOrTitle( { label: "Save" } ); // ERR
-  ```
+## Grundlagen
 ---
 ### Type Aliase
 * Mit dem Schlüsselwort [`type`](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) wird ein __Type Alias__ erzeugt.
@@ -341,28 +320,34 @@ function printTitle(hopefullyAMovie: any) {
 
   addContact({email: "nils@nilshartmann.net", phone: "..."})
   ```
-
 ---
-### keyof
-
-* [`keyof`](https://www.typescriptlang.org/docs/handbook/2/keyof-types.html) liefert einen Union Typen zurück, der alle Keys eines Objektes enthält
+### Union Types
+* Variablen, Parameter etc. können mehr als einen Typ annehmen:            
 * ```typescript
-  type Person = {
-    firstname: string;
-    lastname: string;
-  }
-  type PersonKeys = keyof Person; // "firstname" | "lastname"
+    type Person = { name: string };
+    type Movie = { title: string };
 
-  ```
-* Damit kann man zum Beispiel erzwingen, das ein Funktionsparameter nur gültige
-  Keys eines Objekts aufnehmen kann:
-* ```typescript
-  declare function logPropertyOfPerson(propName: keyof Person): void;
+    type PersonOrMovie = Person | Movie;
 
-  logPropertyOfPerson("firstname"); // OK
-  logPropertyOfPerson("age") // ERR: Argument of type '"age"' is not 
-                             // assignable to parameter of type 'keyof Person'
+    function printNameOrTitle(obj: PersonOrMovie) { 
 
+      console.log(obj.title); // ERR: Property 'title' does not 
+                              // exist on type 'Person | Movie'
+    
+      if ("title" in obj) { // Abfrage ist ein "Type Guard"
+        // obj ist Movie hier, title ist definiert
+        console.log(obj.title);
+      } else {
+        // obj ist Person hier: name ist definiert
+        console.log(obj.name);
+      }
+    }
+
+    printNameOrTitle( { name: "Klaus" } ); // OK
+
+    printNameOrTitle( { title: "TypeScript Deep Dive" } ); // OK
+
+    printNameOrTitle( { label: "Save" } ); // ERR
   ```
 ---
 ### Literal Types
@@ -390,6 +375,29 @@ function printTitle(hopefullyAMovie: any) {
   toggleBit(1); // OK
   toggleBit(2); // ERR
   ```
+---
+### keyof
+
+* [`keyof`](https://www.typescriptlang.org/docs/handbook/2/keyof-types.html) liefert einen Union Typen zurück, der alle Keys eines Objektes enthält
+* ```typescript
+  type Person = {
+    firstname: string;
+    lastname: string;
+  }
+  type PersonKeys = keyof Person; // "firstname" | "lastname"
+
+  ```
+* Damit kann man zum Beispiel erzwingen, das ein Funktionsparameter nur gültige
+  Keys eines Objekts aufnehmen kann:
+* ```typescript
+  declare function logPropertyOfPerson(propName: keyof Person): void;
+
+  logPropertyOfPerson("firstname"); // OK
+  logPropertyOfPerson("age") // ERR: Argument of type '"age"' is not 
+                             // assignable to parameter of type 'keyof Person'
+
+  ```
+
  
 ---
 ### Der typeof-Operator
@@ -426,12 +434,12 @@ function printTitle(hopefullyAMovie: any) {
 * Im [TypeScript Playground](https://www.typescriptlang.org/play) könnt ihr mit `// ?^` unter einer Variablen Euch deren Typen anzeigen lassen
 * ![Tooltip](./slides/images/screenshot-type-tooltip.png)
 * Für VS Code gibt es dazu eine [Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-twoslash-queries)
-
+---
+## Generics
 ---
 ### Generics
 * **Beispiel**: eine (JavaScript-)Funktion, die einen beliebigen Wert validiert. Wenn der Wert gültig ist,
 wird er von der Funktion unverändert zurückgegeben, ansonsten wirft die Funktion einen `Error` und kehrt nicht zurück.
-* 
 * Mit `any` können wir Funktionen beschreiben, die alle möglichen Typen entgegennehmen
   und/oder zurückliefern
   * ```typescript
@@ -572,8 +580,10 @@ beliebigen Objektes zurückliefern.
     const ageSetter = createSetter({firstname: "Klaus", age: 32}, "firstname");
     ageSetter(33);
     ```
-* Die Übung kannst Du in `src/210_uebung_generics.ts` machen. Dort findest Du weitere Hinweise.
-* Mögliche Lösungen findest Du in `src/210s_uebung_generics.ts` (`s` wie `solution`)
+* Die Übung kannst Du in `src/290_uebung_generics.ts` machen. Dort findest Du weitere Hinweise.
+* Mögliche Lösungen findest Du in `src/290s_uebung_generics.ts` (`s` wie `solution`)
+---
+## Mapped Types
 ---
 ### Mapped Types
 * Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
@@ -738,12 +748,12 @@ beliebigen Objektes zurückliefern.
     const result = validate(person, personValidators);
     // { firstname: true, age: false }
   ```
-* In `src/330_uebung_mapped_type.ts` findest Du Ausgangsmaterial mit Hinweisen.
-* Mögliche Lösungen findest Du in `src/330s_uebung_mapped_type.ts`
-* <!-- .element: class="todo" --> Wie lange?
+* In `src/390_uebung_mapped_type.ts` findest Du Ausgangsmaterial mit Hinweisen.
+* Mögliche Lösungen findest Du in `src/390s_uebung_mapped_type.ts`
 ---
-<!-- .slide: data-hidden="true" -->
 ### Übung Mapped Types    
+<!-- .slide: data-visibility="hidden" -->
+
 * <!-- .element: class="todo" -->Hinweisen: entweder Typ für Validator-Objekt erst bauen, oder die validator-Funktionen beim Aufruf der Methode angeben, sonst kann TS die Argumente nicht ableiten
 * <!-- .element: class="todo" -->deswegen erst `ValidatorsObjekt` bauen (lassen)
 * Die `validate`-Funktion soll zwei Parameter haben:
@@ -764,7 +774,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ```
 ---
 ### Mögliche Lösung
-<!-- .slide: data-hidden="true" -->
+<!-- .slide: data-visibility="hidden" -->
 <!-- .slide: class="left" -->
 * ```typescript
   // Ein Typ für das Ergebnis der validate-Funktion
@@ -1021,10 +1031,13 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
     hobbies: string[] | null; // 'string[]' ist Rückgabe-Typ von Person.hobbies
   }
   ```
-* Material findest Du in `src/430_uebung_conditional.ts`
-* Mögliche Lösung in `src/430s_uebung_conditional.ts`
-
+* Material findest Du in `src/490_uebung_conditional.ts`
+* Mögliche Lösung in `src/490s_uebung_conditional.ts`
 ---
+<!-- -------------------------------------------------------------- -->
+<!--    TEMPLATE LITERAL TYPES                                      -->
+<!-- -------------------------------------------------------------- -->
+
 ### Template Literal Types
 <!-- .slide: class="left" -->
 * Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein.
@@ -1111,10 +1124,6 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   setSpacing("margin-right", "2rem");  // OK
   setSpacing("padding-center", "2rem"); // ERROR
   ```
-* Können wir das so erweitern, dann man einen (mehr oder weniger) kompletten, gültigen CSS-Ausdruck hinschreiben muss, so dass folgendes geht:
-  * `setSpacing("margin-right: 2rem")` ✅
-  * `setSpacing("margin-middle: 2rem")` ❌
-  * `setSpacing("padding-top: 24pt")` ❌
 ---
 ### String Manipulation in Template Literal Types
 
@@ -1171,12 +1180,19 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 ---
 ### Übung: Template Literal Types
 <!-- .slide: class="left" -->
-* Übung eventuell für JS Days rausnehmen 
-<!-- .element: class="todo" -->
 * Erweitere den `Spacing` bzw. `CSSClassnames`-Typen, so dass er einem (mehr oder weniger) kompletten, gültigen CSS-Ausdruck entspricht:
   * `setSpacing("margin-right: 2rem")` ✅
   * `setSpacing("margin-middle: 2rem")` ❌
   * `setSpacing("padding-top: 24pt")` ❌
+* Schreibe einen Typen, der ein `Spacing` und eine `Direction` 
+  entgegennimmt, und einen String ausdrückt, der die beiden Typen als PascalCase enthält
+  (`"margin"`,`"top"`) => `"MarginTop"`
+* In `src/590_template_literal_uebung.ts` findest Du das Material mit Hinweisen.
+* Mögliche Lösung in `src/590s_template_literal_uebung.ts`  
+
+---
+### Übung 2 (muss später)
+<!-- .slide: data-visibility="hidden" -->  
 * Etwas trickreich:
   * Schreibe einen `SwapCapitalize`-Typen, der einen `string` entgegennimmt 
     - Wenn der String mit einem Großbuchstaben anfängt, soll der String mit Kleinbuchstaben zurückgeliefert werden, sonst umgekehrt
@@ -1189,11 +1205,9 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
     type B = SwapCapitalize<"AddListener">;
       // ^?  "addListener"
     ```
-* Sehr trickreich:
-  * Kannst Du den `Capitalize`-Typen von TypeScript selbst implementieren? 🤯 🤯 🤯  
-  
 ---
-### Lösung: Template Literal Types
+### Lösung: Template Literal Types (muss später)
+<!-- .slide: data-visibility="hidden" -->
 <!-- .slide: class="left" -->
 * CSS Ausdruck:
 * ```typescript
@@ -1407,18 +1421,19 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
   const setters = createSetter( { firstname: "klaus", age: 32} ) ;
   // Ändern des Vornamens:
   setters.setFirstname("Moni"); // ✅
-  setter.firstname("Moni"); // ❌
+  setters.firstname("Moni"); // ❌
   ```
 * Ob das Entfernen der nicht-String-Keys korrekt ist, ist eine fachliche Frage
   * Was könnten wir stattdessen tun? 🤔 
 
 ---
 ### Übung: Template Literal Types
-* <!-- .element: class="todo" -->JS Days: lange Herleitung mit Union und Intersection Type evtl. raus, einfach nur auf `&` hinweisen
-* <!-- .element: class="todo" -->Dann hier eine Übung, die mit dem Validator-Funktion erweitert (z.B. Keys im ValidatedObject sollen anders heißen)
+
+* Modi
+
 
 ---
-### Conditional Types mit Template Literal Types
+### Ausblick: Conditional Types mit Template Literal Types
 <!-- .slide: class="left" -->
 - <!-- .element: class="todo" -->für JS Days evtl. zu viel
 * Mit einem Conditional Type können wir prüfen, on ein Typ einem (String-)Muster entspricht

@@ -10,7 +10,8 @@ export default undefined;
  
 * Die Funktion soll zwei Parameter haben:
   1. Ein beliebiges Objekt (`someObject`), 
-  2. Den Namen eines Keys aus dem Objekt (`aKey`)
+  2. Den Namen eines Keys aus dem Objekt (`aKey`). Alle anderen Strings sind verboten.
+     Kleiner Tipp: Du musst 'keyof' verwenden :-)
 
 * Der Rückgabe-Typ soll eine Funktion sein, die ihrerseits ein Argument hat, das vom Typ des Properties aus dem übergebenen
   Objekt (`someObject`) ist, so dass diese Funktion aufgerufen werden kann, um den Wert des Objektes zu setzen. 

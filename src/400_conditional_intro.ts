@@ -1,9 +1,10 @@
 export default undefined;
 
-// - getLength
+// - Beispiel 1: getLength
 
-// - Union Type NumberOrNull
+// - Union Type mit Condiational: NumberOrNull
 //   -  type NumberOrNull<O> = O extends string ? number : null;
+//       NumberOrNull<string|boolean>
 
 // - exkurs: Union Type mit "never"
 
@@ -19,3 +20,6 @@ export default undefined;
 
 // - Vorbereitung für Übung: (nur vielleicht)
 //   - Keys Filtern aus einem Objekt
+
+
+declare function readFromDatabase
