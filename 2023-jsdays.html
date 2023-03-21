@@ -154,94 +154,39 @@
 * Im `src`-Verzeichnis findet ihr (fast) alle Beispiele aus den Slides auch im Quellcode
 * Wir machen aber gemeinsam Übungen, dann habt ihr Zeit, Dinge selbst auszuprobieren
 ---
-### TypeScript ausprobieren
-* Online im TypeScript Playground: https://www.typescriptlang.org/play
+## Agenda
+
+* [Grundlagen](#/t-intro)
+* [Generics](#/t-generics)
+* [Mapped Types](#/t-mapped-types)
+* [Conditional Types](#/t-conditional-types)
+  * [Type inference mit Conditional Types](#/t-conditional-types-inference)
+* [Template Literale](#/t-template-literale)
+  * [Remapping von Keys](#/t-template-literale-remapping)
+  * [Intersection und Union Types (Exkurs)](#/t-intersection-und-union-types)
+  * [Conditional Types mit Template Literalen](#/t-template-literale-conditional-types)
 ---
-### Übung: Grundlagen
-* Eine kurze Übung zum "warm werden"
-* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
-* Du musst einen Union Typen erzeugen
-* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
-* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
-* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
-* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
----
-### Advanced TypeScript
+### Unser Workshop heute...
 
 * Wir konzentrieren uns heute nur auf die Typ-Ebene
 * Die gezeigten Beispiele kommen daher ohne Implementierung aus
 * Ich möchte Euch zeigen, wie ihr komplexe Typ-Definitionen schreiben könnt, von denen Verwender Eurer APIs dann profitieren
   * Die APIs kann man nutzen, ohne viel TypeScript Typen schreiben zu müssen
   * Verwendung der APIs ist aber trotzdem typsicher
-          </textarea>
-        </section>
-
-        <!-- <section>
-          <h2>Eingebaute Typen: any und unknown</h2>
-          <pre
-            class="fragment"
-          ><code class="typescript line-numbers" contenteditable data-trim>
-  // unknown: kann ebefalls alle Typen aufnehmen, erzwingt aber vor der Verwendung Typ-Prüfung
-  function loadData(): unknown { return "" // ok }
-  let b = loadData(); 
-  b.toUpperCase(); // ERROR
-  if (typeof b === "string") {
-    // b ist jetzt string (typeof ist Laufzeitprüfung!)
-    b.toUpperCase(); // OK
-  }
-              </code></pre>
-        </section> -->
-
-        <!-- <section>
-          <h2>Type Guards</h2>
-          <p class="todo">evtl. raus für JS Days</p>
-          <p>Durch einen Type Guard können Typen "eingeengt" werden</p>
-          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
-type Person = { name: string };
-type Movie = { title: string };
-
-// Wenn diese Funktion true zurueckgibt, nimmt Typescript an,
-// dass das übergebene Argument vom Typ Movie ist
-function isMovie(candidate: any): candidate is Movie {
-  return ("title" in candidate);
-}
-
-function printNameOrTitle(obj: Person | Movie) { 
-  if (isMovie(obj)) {
-    // movie
-  }
-}
-    
-          </code></pre>
-        </section> -->
-        <!-- <section>
-          <h2>Type Assertions</h2>
-          <p class="todo">evtl. raus für JS Days</p>
-          <pre><code data-trim contenteditable class="line-numbers typescript" data-leftpad>
-type Person = { name: string };
-type Movie = { title: string };
-
-// Wenn diese Funktion zurueckkehrt (kein Error geworfen wird) nimmt Typescript an,
-// dass das übergebene Argument vom Typ Movie  ist
-function assertIsMovie(candidate: any): asserts candidate is  Movie {
-  if ("title" in candidate) {
-    return;
-  }
-  throw new Error("Candidate is not a movie!")
-}
-
-function printTitle(hopefullyAMovie: any) { 
-  assertPersonIsMovie(hopefullyAMovie)
-  // hopefullyAMovie ist jetzt Movie
-  hopefullyAMovie.title; // OK
-}
-    
-          </code></pre>
-        </section> -->
-
-        <section data-markdown>
-          <textarea data-template>
+  
+---
 ## Grundlagen
+<!-- .slide: id="t-intro" -->
+---
+### Zwei kleine Tipps
+* TypeScript online im Playground ausführen: https://www.typescriptlang.org/play
+
+* Typen in der IDE/Editor anzeigen:
+  * In der Regel könnt ihr Euch in Eurem Editor oder Eurer IDE den Typen einer Variable anzeigen lassen, in dem ihr mit der Maus darüber fahrt  
+  * Im [TypeScript Playground](https://www.typescriptlang.org/play) könnt ihr mit `// ?^` unter einer Variablen Euch deren Typen anzeigen lassen
+  * ![Tooltip](./slides/images/screenshot-type-tooltip.png)
+  * Für VS Code gibt es dazu eine [Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-twoslash-queries)
+
 ---
 ### Type Aliase
 * Mit dem Schlüsselwort [`type`](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) wird ein __Type Alias__ erzeugt.
@@ -429,13 +374,19 @@ function printTitle(hopefullyAMovie: any) {
   ```
   
 ---
-### Typen anzeigen
-* In der Regel könnt ihr Euch in Eurem Editor oder Eurer IDE den Typen einer Variable anzeigen lassen, in dem ihr mit der Maus darüber fahrt  
-* Im [TypeScript Playground](https://www.typescriptlang.org/play) könnt ihr mit `// ?^` unter einer Variablen Euch deren Typen anzeigen lassen
-* ![Tooltip](./slides/images/screenshot-type-tooltip.png)
-* Für VS Code gibt es dazu eine [Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-twoslash-queries)
+### Übung: Grundlagen
+* Eine kurze Übung zum "warm werden"
+* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
+* Du musst einen Union Typen erzeugen
+* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
+* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
+* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
+* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
+
 ---
 ## Generics
+<!-- .slide: id="t-generics" -->
+
 ---
 ### Generics
 * **Beispiel**: eine (JavaScript-)Funktion, die einen beliebigen Wert validiert. Wenn der Wert gültig ist,
@@ -451,7 +402,16 @@ wird er von der Funktion unverändert zurückgegeben, ansonsten wirft die Funkti
   const p = validate("hallo"); // p soll string sein (ist: any 😔)
   const n = validate(123); // n soll number sein (ist: any 😔)
   ```
-
+---
+### Übung: Grundlagen
+* Eine kurze Übung zum "warm werden"
+* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
+* Du musst einen Union Typen erzeugen
+* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
+* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
+* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
+* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
+  
 ---
 ### Generics
 * Für Funktionen (und Typen) können **Typ Variablen** definiert werden
@@ -584,6 +544,8 @@ beliebigen Objektes zurückliefern.
 * Mögliche Lösungen findest Du in `src/290s_uebung_generics.ts` (`s` wie `solution`)
 ---
 ## Mapped Types
+<!-- .slide: id="t-mapped-types" -->
+
 ---
 ### Mapped Types
 * Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
@@ -804,7 +766,9 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
   ```
 
 ---
-### Conditional Types
+## Conditional Types
+<!-- .slide: id="t-conditional-types" -->
+### Conditional Types: 
 * Für Konstellationen, in denen ein Typ abhängig von einem anderen verwendet werden, gibt es _Conditional Types_.
 * Dazu ein Beispiel:
   * Eine Funktion nimmt einen `string` oder `null` entgegen. 
@@ -952,6 +916,8 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 
 ---
 ### Type Inference mit Conditional Types
+<!-- .slide: id="t-conditional-types-inference" -->
+
 
 * Mit einem Conditional Type können wir nicht nur Typen überprüfen, sondern auch Typen _extrahieren_ lassen
 * Beispiel:
@@ -1038,8 +1004,10 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 <!--    TEMPLATE LITERAL TYPES                                      -->
 <!-- -------------------------------------------------------------- -->
 
-### Template Literal Types
+## Template Literal Types
+<!-- .slide: id="t-template-literale" -->
 <!-- .slide: class="left" -->
+### Hintergrund: Literal Types
 * Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein.
 * Damit können wir zum Beispiele eine Art Aufzählungstyp bauen, um sicherzustellen, dass nur semantisch korrekte Strings
   an einer Stelle verwendet werden:
@@ -1231,6 +1199,8 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 
 ---
 ### Keys mit Template Literal Types umbenennen
+<!-- .slide: id="t-template-literale-remapping" -->
+
 - Wenn ihr einen _Key_ in einem Mapped Type umbenennen wollt, könnt ihr das mit einem Template Literal Type tun
 * Fachliches Beispiel:
   - Die schon gesehene `createSetter`-Funktion liefert Setter-Funktionen für ein ganzes Objekt (`anObject`) zurück
@@ -1294,6 +1264,7 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 * Es gibt eine andere Alternative...
 ---
 ### Exkurs: Intersection und Union Types
+<!-- .slide: id="t-intersection-und-union-types" -->
 
 * Ein _Intersection Type_ stellt eine "Überschneidung" aus zwei Typen dar.
 * ```typescript
@@ -1434,6 +1405,8 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
 
 ---
 ### Ausblick: Conditional Types mit Template Literal Types
+<!-- .slide: id="t-template-literale-conditional-types" -->
+
 <!-- .slide: class="left" -->
 - <!-- .element: class="todo" -->für JS Days evtl. zu viel
 * Mit einem Conditional Type können wir prüfen, on ein Typ einem (String-)Muster entspricht

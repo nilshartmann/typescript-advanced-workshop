@@ -7,3 +7,5 @@ export default undefined;
 // - keyof
 // - Literal  (Languanges)
 // - typeof
+//
+// - Übung: typeof + union type
