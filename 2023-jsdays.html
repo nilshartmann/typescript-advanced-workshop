@@ -52,7 +52,9 @@
 
           <p style="margin-top: 4rem"></p>
           <div>
-            <h3><span class="transparent-bg">Repository</span></h3>
+            <h3>
+              <span class="transparent-bg">Repository (bitte klonen 🤓)</span>
+            </h3>
             <p>
               <span class="transparent-bg"
                 >https://github.com/nilshartmann/typescript-advanced-workshop</span
@@ -402,15 +404,6 @@ wird er von der Funktion unverändert zurückgegeben, ansonsten wirft die Funkti
   const p = validate("hallo"); // p soll string sein (ist: any 😔)
   const n = validate(123); // n soll number sein (ist: any 😔)
   ```
----
-### Übung: Grundlagen
-* Eine kurze Übung zum "warm werden"
-* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
-* Du musst einen Union Typen erzeugen
-* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
-* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
-* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
-* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
   
 ---
 ### Generics
@@ -1523,9 +1516,6 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
       ? ToCamelCase<`${left}${Capitalize<right>}`>
       : S;
     ```
----
-### todo
-* <!-- .element: class="todo" -->Zeitplan für JSDays prüfen
 
 
           </textarea>
