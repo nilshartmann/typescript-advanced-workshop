@@ -9,10 +9,11 @@ export default undefined;
 //    aber OHNE Eigenschaftname
 //
 // - String Manipulation (Event Listener Beispiel)
+
 // - Beispiel String Literal mit Conditional
 //   (switchTheme mit Color)
 //    extends "Light" ? "Dark": "Dark" Light
 //
-// - Dann kommt Übung
-//    - Capitalize
-//    - je nach Zeit die Übung überspringen
+// -  Übung wird übersprungen!!!
+
+// - Weitermachen mit Key Remapping in 600_...

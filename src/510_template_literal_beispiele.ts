@@ -55,3 +55,11 @@ declare function setSpacing(c: CSSClassNames, size: Size4): void;
 
 setSpacing("margin-right", "2rem"); // OK
 setSpacing("padding-center", "2rem"); // ERROR
+
+// ------------ Beispiel: String Manipulation
+type ListenerName<E extends string> = `add${Capitalize<E>}Listener`;
+
+type ChangeListenerName = ListenerName<"change">;
+// ^?  addChangeListener 😊
+
+const changeListenerName: ChangeListenerName = "addChangeListener";

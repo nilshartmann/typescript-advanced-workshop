@@ -148,7 +148,7 @@
 ### Vorbereitung für Übungen
 * Bitte klont das Repository: https://github.com/nilshartmann/typescript-advanced-workshop
 * Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
-* In Eurer IDE/Editor sicherstellen, dass die Version verwendet wird
+* In Eurer IDE/Editor sicherstellen, dass diese Version auch verwendet wird
 * Die Slides findet ihr im Root-Verzeichnis: `2023-jsdays.html`
   * Die könnt ihr im Brower öffnen
 * Im `src`-Verzeichnis findet ihr (fast) alle Beispiele aus den Slides auch im Quellcode
@@ -1006,8 +1006,9 @@ personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable 
 
 ## Template Literal Types
 <!-- .slide: id="t-template-literale" -->
-<!-- .slide: class="left" -->
+---
 ### Hintergrund: Literal Types
+<!-- .slide: class="left" -->
 * Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein.
 * Damit können wir zum Beispiele eine Art Aufzählungstyp bauen, um sicherzustellen, dass nur semantisch korrekte Strings
   an einer Stelle verwendet werden:
@@ -1400,7 +1401,20 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
 ---
 ### Übung: Template Literal Types
 
-* Modi
+* Modifiziere den Typen für die `validate`-Funktion
+*  In dem Objekt mit den `validator`-Funktionen sollen die Namen der Keys jeweils mit `validate` anfangen:
+  * `lastname` => `validateLastname`
+  * `age` => `setAge`
+* **Optional**:
+  * In dem validate-Objekt sollen keine validator-Funktionen erlaubt sein, wenn der Eintrag im 
+  zu validierenden Objekt eine void-Funktion ist 🤯
+  * ```typescript
+    const person = { age: 32, sayHello: () { /* void-Funktion! */ } };
+    // im validator-Objekt muss ein Eintrag für `age` (`validateAge`) vorhanden sein,
+    // aber KEIN Eintrag für `sayHello`
+    ```
+* Hinweise und Vorlagen findest Du in `690_template_literal_remapping_uebung.ts`
+* Mögliche Lösungen findest Du in `690s_template_literal_remapping_uebung.ts`  
 
 
 ---
@@ -1408,7 +1422,6 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
 <!-- .slide: id="t-template-literale-conditional-types" -->
 
 <!-- .slide: class="left" -->
-- <!-- .element: class="todo" -->für JS Days evtl. zu viel
 * Mit einem Conditional Type können wir prüfen, on ein Typ einem (String-)Muster entspricht
 * ```typescript
   type IsAddListenerName<S> = S extends `add${string}Listener` ? true : false;
