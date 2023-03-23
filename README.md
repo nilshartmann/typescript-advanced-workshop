@@ -1,12 +1,19 @@
-# TypeScript - fortgeschrittene Typen und Konzepte
+# TypeScript "Advanced" - fortgeschrittene Typen und Konzepte
 
-Code-Beispiele und Übungsmaterial zu meinem [TypeScript Workshop auf den JS Days 2023](https://javascript-days.de/javascript/advanced-typescript/) vom 23.03.2023
+Code-Beispiele und Übungsmaterial zu meinen TypeScript Workshops.
 
-## Verwendung
+## Material und Beipiele
 
-Im `src`-Verzeichnis findest Du jeweils zwei Dateien
+* Siehe `src`-Verzeichnis
+* Dateien mit `_uebung` enthalten Übungen, die Dateien mit `XXXs_uebung` enthalten die jeweilige mögliche Lösung
 
-- `<schritt>_<dateiname>.ts` enthält den Ausgangscode eines Beispiels
-- `<schritt>_x_<dateiname>.ts` enthält jeweils das fertige Beispiel
+## Slides
 
-Wenn Du selbst ausprobieren möchtest, kannst Du also in den Dateien ohne `x` experimentieren. Ich habe dort (rudimentär) beschrieben, was jeweils zu tun ist.
+* ["TypeScript Advanced"](https://javascript-days.de/javascript/advanced-typescript/) auf den JavaScript Days 2023: [./2023-jsdays.html](./2023-jsdays.html)
+
+## In-House Workshops
+
+Ich biete auch individuelle In-House-Workshops zu TypeScript an. Mehr Informationen dazu findest Du [auf meiner Homepage](https://nilshartmann.net/workshops/). Bei Interesse melde dich gerne bei mir.
+
+
+
