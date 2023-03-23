@@ -9,7 +9,7 @@ Code-Beispiele und Übungsmaterial zu meinen TypeScript Workshops.
 
 ## Slides
 
-* ["TypeScript Advanced"](https://javascript-days.de/javascript/advanced-typescript/) auf den JavaScript Days 2023: [./2023-jsdays.html](./2023-jsdays.html)
+* ["TypeScript Advanced", JavaScript Days 2023](https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html)
 
 ## In-House Workshops
 
