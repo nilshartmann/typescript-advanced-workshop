@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>TypeScript Workshop</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"
+    />
+    <link rel="stylesheet" href="slides/revealjs/reveal.js/dist/reset.css" />
+    <link rel="stylesheet" href="slides/revealjs/reveal.js/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="slides/revealjs/reveal.js/dist/theme/solarized.css"
+    />
+
+    <!-- Theme used for syntax hislides/ghlighted code -->
+    <link
+      rel="stylesheet"
+      href="slides/revealjs/highlight-js-github-theme.css"
+    />
+    <link rel="stylesheet" href="slides/revealjs/styles.css" />
+  </head>
+
+  <body>
+    <div class="reveal" data-beta="true">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-state="title">
+          <h2 class="title" style="font-size: 7rem">
+            <b>TypeScript Advanced</b>
+          </h2>
+
+          <h4>
+            <span class="transparent-bg">
+              <a href="https://nilshartmann.net" target="_blank"
+                >Nils Hartmann</a
+              >
+              |
+              <a href="https://twitter.com/nilshartmann" target="_blank"
+                >@nilshartmann</a
+              >
+            </span>
+          </h4>
+
+          <p style="margin-top: 4rem"></p>
+          <div>
+            <h3>
+              <span class="transparent-bg">Repository (bitte klonen 🤓)</span>
+            </h3>
+            <p>
+              <code class="transparent-bg" style="font-size: 50px"
+                ><b
+                  >https://github.com/nilshartmann/typescript-advanced-workshop</b
+                ></code
+              >
+            </p>
+          </div>
+
+          <p style="margin-top: 4rem"></p>
+          <div>
+            <h3><span class="transparent-bg">Slides</span></h3>
+            <p>
+              <span class="transparent-bg">Lokal: 2023-jsdays.html</span>
+            </p>
+            <p>
+              <span class="transparent-bg"
+                >Remote:
+                <a
+                  href="https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html"
+                >
+                  https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html</a
+                ></span
+              >
+            </p>
+          </div>
+        </section>
+        <section>
+          <h2>Nils Hartmann</h2>
+          <p style="margin-top: 2rem">
+            <a href="https://nilshartmann.net" target="_blank"
+              >https://nilshartmann.net</a
+            >
+            /
+            <a href="https://twitter.com/nilshartmann" target="_blank"
+              >@nilshartmann</a
+            >
+          </p>
+          <p style="margin-top: 2rem">
+            <em
+              >Freiberuflicher Software-Entwickler, Berater und Trainer aus
+              Hamburg</em
+            >
+          </p>
+          <p></p>
+          <p style="margin-top: 5rem">
+            Java | JavaScript, TypeScript | React | GraphQL
+          </p>
+          <div style="display: flex; justify-content: center; margin-top: 2rem">
+            <div style="margin-left: 15px">
+              <a href="https://graphql.schule/video-kurs"
+                ><img
+                  style="max-height: 450px"
+                  src="slides/images/screenshot-graphql-kurs.png"
+                /><br />https://graphql.schule/video-kurs</a
+              >
+              <br />
+            </div>
+            <!--  -->
+            <div style="margin-left: 100px">
+              <a href="https://reactbuch.de"
+                ><img
+                  style="max-height: 450px"
+                  src="slides/images/react-buch-v2.jpg"
+                /><br />https://reactbuch.de</a
+              >
+              <br />
+            </div>
+          </div>
+        </section>
+
+        <!-- Das Typsystem von TypeScript hilft uns in der täglichen Arbeit, typische Programmierfehler zu vermeiden. 
+          Dazu schreiben wir Typ-Angaben zum Beispiel an Variablen oder Funktionsargumente. 
+          Die Beschreibung der Typen selbst ist aber gar nicht immer so trivial. 
+          Durch das dynamische Typsystem von JavaScript kann eine Funktion beispielsweise ein beliebiges Objekt entgegennehmen und in 
+          einer abgeleiteten Form zurückgeben. 
+          Für diese Herausforderung bringt TypeScript eine Art Meta-Sprache mit, mit der sich Typen an Hand verschiedener 
+          Regeln programmieren lassen. Damit lassen sich auch für komplexe Anwendungsfälle, zum Beispiel APIs von Bibliotheken, 
+          Typen beschreiben, so dass Nutzerinnen und Nutzer der Funktionen vollständige Typsicherheit haben - 
+          ohne selbst Typdefinitionen schreiben zu müssen.
+
+
+        In diesem Workshop sehen wir uns diese Meta-Sprache an Hand von Beispielen in der Praxis an. 
+        Wir werden unter anderem Mapped Types, Utility Types und Conditional Types untersuchen und sehen, 
+        für welche Anwendungsfälle sie jeweils geeignet sind.
+         Dazu machen wir natürlich auch Übungen, so dass Du das Gelernte direkt Hands-on ausprobieren kannst. 
+         Für den Workshop solltest Du grundsätzliche TypeScript-Kenntnisse mitbringen. 
+        
+        https://javascript-days.de/javascript/advanced-typescript/
+        -->
+
+        <!-- ######################################################  -->
+        <section data-markdown>
+          <textarea data-template>
+### Vorbereitung für Übungen
+* Bitte klont das Repository: https://github.com/nilshartmann/typescript-advanced-workshop
+* Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
+* In Eurer IDE/Editor sicherstellen, dass diese Version auch verwendet wird
+* Die Slides findet ihr im Root-Verzeichnis: `2023-jsdays.html`
+  * Die könnt ihr im Brower öffnen
+* Im `src`-Verzeichnis findet ihr (fast) alle Beispiele aus den Slides auch im Quellcode
+* Wir machen aber gemeinsam Übungen, dann habt ihr Zeit, Dinge selbst auszuprobieren
+---
+## Agenda
+
+* [Grundlagen](#/t-intro)
+* [Generics](#/t-generics)
+* [Mapped Types](#/t-mapped-types)
+* [Conditional Types](#/t-conditional-types)
+  * [Type inference mit Conditional Types](#/t-conditional-types-inference)
+* [Template Literale](#/t-template-literale)
+  * [Remapping von Keys](#/t-template-literale-remapping)
+  * [Intersection und Union Types (Exkurs)](#/t-intersection-und-union-types)
+  * [Conditional Types mit Template Literalen](#/t-template-literale-conditional-types)
+---
+### Unser Workshop heute...
+
+* Wir konzentrieren uns heute nur auf die Typ-Ebene
+* Die gezeigten Beispiele kommen daher ohne Implementierung aus
+* Ich möchte Euch zeigen, wie ihr komplexe Typ-Definitionen schreiben könnt, von denen Verwender Eurer APIs dann profitieren
+  * Die APIs kann man nutzen, ohne viel TypeScript Typen schreiben zu müssen
+  * Verwendung der APIs ist aber trotzdem typsicher
+  
+---
+## Grundlagen
+<!-- .slide: id="t-intro" -->
+---
+### Zwei kleine Tipps
+* TypeScript online im Playground ausführen: https://www.typescriptlang.org/play
+
+* Typen in der IDE/Editor anzeigen:
+  * In der Regel könnt ihr Euch in Eurem Editor oder Eurer IDE den Typen einer Variable anzeigen lassen, in dem ihr mit der Maus darüber fahrt  
+  * Im [TypeScript Playground](https://www.typescriptlang.org/play) könnt ihr mit `// ?^` unter einer Variablen Euch deren Typen anzeigen lassen
+  * ![Tooltip](./slides/images/screenshot-type-tooltip.png)
+  * Für VS Code gibt es dazu eine [Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-twoslash-queries)
+
+---
+### Type Aliase
+* Mit dem Schlüsselwort [`type`](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) wird ein __Type Alias__ erzeugt.
+* Ein Type Alias ist nur ein (anderer) Name für einen Typen
+* Man kann immer entweder einen Type Alias oder einen kompletten Typen hinschreiben
+* Beispiele:
+  * ```typescript
+    declare function createPerson(firstname: string, address: {city: string} ): 
+                                        { firstname: string, address: { city: string } };
+
+    ```
+  * ist identisch mit:  
+  * ```typescript
+    type Address = {
+      city: string;
+    }
+    type Person = {
+      firstname: string
+      address: { city: string }
+    }
+    declare function createPerson(firstname: string, address: Address ): Person;
+  ```
+
+  * ...und auch das ist identisch:
+  * ```typescript
+    type Address = {
+      city: string;
+    }
+    type Person = {
+      firstname: string
+      address: Address
+    }
+    declare function createPerson(firstname: string, address: Address ): Person;
+  ```
+* Man verwendet immer das, was am besten passt
+---
+### Index Access
+* Mit dem Index Operator kannst Du in JavaScript auf _Werte_ aus einem _Objekt_ zugreifen:
+* ```typescript
+  const person = {
+    firstname: "Klaus",
+    address: { city: "Hamburg", street: "Reeperbahn" }
+  }
+
+  const address = person["address"];
+  ```
+* Etwas ähnliches kannst Du auch mit _Typen_ machen, wenn du den _Typ_ eines Properties benötigst:
+* ```typescript
+  type Person = {
+    firstname: string
+    address: { city: string }
+  }
+
+  type Address = Person["address"]
+  ```
+* Das kann hilfreich sein, wenn Du einen Typen hast, den Du nicht selbst beschrieben hast. 
+  * Zum Beispiel wenn der Typ aus einer Bibliothek stammt oder von einem Code Generator erzeugt wurde.
+
+---
+### Index Access #2
+* Wenn Du den Typen eines Arrays benötigst, kannst Du statt eines Property-Namens `[number]` hinschreiben:
+* ```typescript
+  type Person = {
+    contacts: [
+      {
+        email: string;
+        phone: string;
+      }
+    ];
+  };
+
+  type Contacts = Person["contacts"];        // Array<{ email: string, phone: string }>
+  type Contact = Person["contacts"][number]; //       { email: string, phone: string }
+
+  declare function addContact(c: Contact): void;
+
+  addContact({email: "nils@nilshartmann.net", phone: "..."})
+  ```
+---
+### Union Types
+* Variablen, Parameter etc. können mehr als einen Typ annehmen:            
+* ```typescript
+    type Person = { name: string };
+    type Movie = { title: string };
+
+    type PersonOrMovie = Person | Movie;
+
+    function printNameOrTitle(obj: PersonOrMovie) { 
+
+      console.log(obj.title); // ERR: Property 'title' does not 
+                              // exist on type 'Person | Movie'
+    
+      if ("title" in obj) { // Abfrage ist ein "Type Guard"
+        // obj ist Movie hier, title ist definiert
+        console.log(obj.title);
+      } else {
+        // obj ist Person hier: name ist definiert
+        console.log(obj.name);
+      }
+    }
+
+    printNameOrTitle( { name: "Klaus" } ); // OK
+
+    printNameOrTitle( { title: "TypeScript Deep Dive" } ); // OK
+
+    printNameOrTitle( { label: "Save" } ); // ERR
+  ```
+---
+### Literal Types
+* Mit einem [Literal Type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types) kannst Du einen Typen definieren, der einen konkreten String darstellt 
+* ```typescript
+  // Beispiel:             
+  type Answer = "Yes" | "No" | "I_dont_care";
+
+  const a1:Answer = "Yes"; // OK
+  const a2:View = "Maybe" // FEHLER
+  ```
+* ```typescript
+  function fillIn(a: Answer) {
+    if (a === "Yes") { ... } // ok
+    if (a === "Maybe") { ... } // error: immer false
+  }
+
+  fillIn("I_dont_care"); //OK
+  fillIn("Maybe"); // ERROR
+  ```
+* Das funktioniert auch für number 
+* ```typescript
+  type OneOrZero = 1 | 0;
+  declare function toggleBit(v: OneOrZero): void;
+  toggleBit(1); // OK
+  toggleBit(2); // ERR
+  ```
+---
+### keyof
+
+* [`keyof`](https://www.typescriptlang.org/docs/handbook/2/keyof-types.html) liefert einen Union Typen zurück, der alle Keys eines Objektes enthält
+* ```typescript
+  type Person = {
+    firstname: string;
+    lastname: string;
+  }
+  type PersonKeys = keyof Person; // "firstname" | "lastname"
+
+  ```
+* Damit kann man zum Beispiel erzwingen, das ein Funktionsparameter nur gültige
+  Keys eines Objekts aufnehmen kann:
+* ```typescript
+  declare function logPropertyOfPerson(propName: keyof Person): void;
+
+  logPropertyOfPerson("firstname"); // OK
+  logPropertyOfPerson("age") // ERR: Argument of type '"age"' is not 
+                             // assignable to parameter of type 'keyof Person'
+
+  ```
+
+ 
+---
+### Der typeof-Operator
+
+* Der `typeof`-Operator in JavaScript liefert den _Wert_ einer Variablen zur Laufzeit zurück.
+* Mit dem [`typeof`-Operator von TypeScript](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#handbook-content) kann der Typ eines Werts auf Typ-Ebene ermittelt werden.
+  * Im Grunde das, was die IDE tut, wenn ihr mit der Maus über einen Variable fahrt
+* ```typescript
+  const languages = {
+    de: "DE",
+    en: "EN"
+  }
+
+  type TLanguages = typeof languages;          // TLanguages ist TYPE, languages ist WERT
+        // { de: string; en: string; }
+
+  export declare function translateMessage(msg: string, lang: keyof TLanguages): string;
+
+  // oder:
+  type TLanguageKeys = keyof typeof languages;
+  export declare function translateMessage(msg: string, lang: TLanguageKeys): string;
+  ```
+* Das geht für alle möglichen Dinge, auch für Funktionen:
+* ```typescript
+  declare function sayHello(name: string): string | null;
+
+  type Fn = typeof sayHello;
+       // (name: string) => string | null
+  ```
+  
+---
+### Übung: Grundlagen
+* Eine kurze Übung zum "warm werden"
+* In der Datei `src/190_intro_uebung.ts` findest Du eine kleine Übung beschrieben
+* Du musst einen Union Typen erzeugen
+* Mehr Informationen findest Du in der Datei, in der Du die Übung auch machen kannst
+* Wir führen heute keinen Code aus, sondern achten nur auf das TypeScript TypeChecking Ergebnis
+* Die erwarteten Fehler (bzw. nicht-Fehler) habe ich Euch in die Datei geschrieben.
+* Eine mögliche Lösung findest Du in `190s_intro_uebung.ts` ("S" wie Solution 😊)
+
+---
+## Generics
+<!-- .slide: id="t-generics" -->
+
+---
+### Generics
+* **Beispiel**: eine (JavaScript-)Funktion, die einen beliebigen Wert validiert. Wenn der Wert gültig ist,
+wird er von der Funktion unverändert zurückgegeben, ansonsten wirft die Funktion einen `Error` und kehrt nicht zurück.
+* Mit `any` können wir Funktionen beschreiben, die alle möglichen Typen entgegennehmen
+  und/oder zurückliefern
+  * ```typescript
+    declare function validate(obj: any): any
+    ```
+* Was machen wir aber, wenn wir den übergebenen Typen (für `obj`) an anderer Stelle benötigen?
+  * Zum Beispiel, um sicherzustellen, dass der Rückgabe-Typ dem Typen eines Parameters entspricht?
+* ```typescript
+  const p = validate("hallo"); // p soll string sein (ist: any 😔)
+  const n = validate(123); // n soll number sein (ist: any 😔)
+  ```
+  
+---
+### Generics
+* Für Funktionen (und Typen) können **Typ Variablen** definiert werden
+* Fast wie Funktionsparameter, nur dass keine __Werte__, sondern __Typen__ angegeben werden
+* Die Typ Variable wird deklariert (`<VariablenName>`) und kann dann in der gesamten Funktionssignatur bzw. Typ-Definition verwendet werden
+* Vorheriges Beispiel, jetzt mit Generics und gewünschtem Verhalten:
+  * ```typescript
+    // "O" ist Typ Variable
+
+    declare function validate<O>(o: O): O
+    const p = validate("hallo"); // p jetzt string 😊
+    const n = validate(123); // n jetzt number 😊
+    ```
+* Weitere Beispiele
+  * Fachliche Idee: Die Funktion liefert den übergebenen Wert zurück
+    oder "null", falls der Wert ungültig ist (was auch immer "ungültig" hier bedeutet)  
+  * ```typescript
+      declare function validate<O>(o: O): O | null
+    ```
+  * Ein Typ, der entweder eine Liste von Dingen ist oder `null`
+    * (fachlich bescheuertes Beispiel, bessere Beispiele folgen...)
+  * ```typescript
+      type ListOrNull<O> = Array<O> | null;
+    ```
+---
+### Generics
+* Beim Verwenden in einer Funktion wird der __Typ__ entweder vom übergebenen __Wert__ abgeleitet:
+* ```typescript
+  declare function validate<O>(o: O): O | null
+  const x = validate("Hallo"); // O ist string, x ist string | null
+  const y = validate(7); // O ist number, y ist number | null
+  ```
+* ...oder der Typ wird explizit angegeben. Dann muss der __Wert__ dem angegebenen __Typen__ entsprechen:
+* ```typescript
+  validate<string>("Hallo"); // O ist string, Argument ist string: Alles OK!
+  validate<string>(7); // O ist string, Argument ist number:
+                       // ERR: Argument of type 'number' is not assignable to parameter of type 'string'
+  ```
+---
+### Generics: Default-Werte
+* Analog zu "normalen" Funktionsargumenten, können auch bei Generics Default**typen** angegeben werden
+* Wie bei Funktionsargumenten kann auch nur der letzte bzw. die letzten Argumente Default-Typen haben
+* ```typescript
+  declare function validate<O, R = string>(o: O): O | R
+
+  validate(7); // RückgabeTyp: number | string 
+  validate<number>(7); // RückgabeTyp: number | string 
+  validate<number, null>(7); // RückgabeTyp: number | null
+  validate<number, boolean>(7); // RückgabeTyp: number | boolean
+  ```
+* ```typescript
+  type Tuple<X, Y = string> = [X, Y];
+
+  type TupleOfNumberAndStrings = Tuple<number>; // [number, string]
+  type TupleOfStringAndBoolean = Tuple<string, boolean>; // [string, boolean]
+  ```
+* Wie bei Funktionsargumenten, können auch Typ Variablen an andere Typen weitergegeben werden:
+* ```typescript
+  type ReactUseStateTuple<V> = Tuple<V, (newValue: V) => void>;
+         // [ V, function(a: V): void ]
+  ```
+
+---
+### Generic: Constraints   
+* Wie bei "normalen" Argumente, können die Typ-Argumente Einschränkungen haben:
+* Die Einschränkungen werden mnit `extends` definiert
+  * Der übergenene Typ muss dann derselbe oder ein davon erweiterter sein:
+* Beispiel: beliebiges Objekt erlaubt  
+* ```typescript
+  declare function validateObject<O extends object>(o: O): O | null;
+
+  validateObject({name: "Klaus"}); // OK
+  validateObject("Klaus");         // ERR: Argument of type 'string' is not 
+                                   // assignable to parameter of type 'object'
+
+  ```
+* Beispiel: nur Objekte mit bestimmter Struktur erlaubt  
+* ```typescript
+  type Person = { firstname: string | null };
+
+  declare function getOrDefault<P extends Person>(p: P): P;
+
+  getOrDefault( { } ); // ERR: Property 'firstname' is missing in type '{}' 
+                       // but required in type 'Person'
+  ```
+---
+### Generics mit Union Typen  
+
+* Wenn man einen Union Type als Constraint angibt, muss der übergebene Typ einem
+  der im Union-Typen enthaltenen Typen entsprechen:  
+* ```typescript
+  type Color = "red" | "blue" | "green";
+
+  declare function bgColor<C extends Color> (c: Color): { backgroundColor: C };
+
+  bgColor("red"); // OK
+  bgColor("white"); // Argument of type '"white"' is not 
+                    // assignable to parameter of type 'Color'
+  ```
+* ```typescript
+  type ListOfStringsOrBooleans<X extends string|boolean> = Array<X>;
+
+  const c1: ListOfStringsOrBooleans<string> = ["a"]; // Ok
+  const c2: ListOfStringsOrBooleans<boolean> = [true]; // Ok
+  const c3: ListOfStringsOrBooleans<string|boolean> = [true, "jo!"]; // Ok
+
+  const c4: ListOfStringsOrBooleans<number> = [4]; // ERR Type 'number' does not satisfy 
+                                                   // the constraint 'string | boolean'
+
+  declare function validateNumberOrString<O extends string|number>(o: O): O | null    
+  ```
+
+---
+### Übung Generics
+* Beschreibe eine Typsichere `createSetter`-Funktion. Die Funktion soll eine fiktive Setter-Funktion für ein Property eines
+beliebigen Objektes zurückliefern.
+  * Fachliche Idee: in der Setter-Funktion können z.B. Überprüfungen durchgeführt werden oder die Setter-Funktion könnte den Wert in eine DB schreiben o.ä.
+* Die Funktion soll zwei Parameter haben:
+  1. Ein beliebiges Objekt (`someObject`), 2. Den Namen eines Keys aus dem Objekt (`aKey`)
+* Der Rückgabe-Typ soll eine Funktion sein, die ihrerseits ein Argument hat, das vom Typ des Properties aus dem übergebenen
+  Objekt (`someObject`) ist, so dass diese Funktion aufgerufen werden kann, um den Wert des Objektes zu setzen. 
+* In JavaScript sähe das so aus:
+  * ```javascript
+    function createSetter(someObject, aKey) { /* ... */ } 
+
+    const ageSetter = createSetter({firstname: "Klaus", age: 32}, "firstname");
+    ageSetter(33);
+    ```
+* Die Übung kannst Du in `src/290_uebung_generics.ts` machen. Dort findest Du weitere Hinweise.
+* Mögliche Lösungen findest Du in `src/290s_uebung_generics.ts` (`s` wie `solution`)
+---
+## Mapped Types
+<!-- .slide: id="t-mapped-types" -->
+
+---
+### Mapped Types
+* Mit einem [Mapped Type](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) kannst Du aus einem bestehenden TypeScript Typen einen anderen erzeugen.
+* Du kannst damit Logik, die in JavaScript auf Werte-Ebene funktioniert auf Typ-Ebene nachbauen
+* Dazu ein Beispiel: eine Funktion, die jedes Feld eines Objekts validiert und ein neues Objekt mit dem Validierungsergebnis zurückliefert:
+* ```javascript
+  function validateField(value) {
+    // Validierungslogik...
+    return true; // oder false
+  }
+
+  function validateObject(object) {
+    if (object == null || typeof object !== "object") {
+      throw new Error("invalid type");
+    }
+    const result = {};
+    Object.keys(object).forEach(k => { 
+      result[k] = validateField(object[k]);
+    });
+    return result;
+  }
+  ```
+* Die Funktion nimmt ein beliebiges Objekt entgegen und liefert ein neues Objekt zurück:
+  * in diesem sind dieselben Keys wie im Ausgangsobjekt vorhanden
+  * Die Werte sind aber in diesem Fall jeweils `true` oder `false` (je nachdem, was die fiktive
+  `validateField`-Funktion zurückgegeben hat.)
+
+---
+### Mapped Types
+* Eine - unzureichende - Typ-Definition für diese Funktion könnte so aussehen:
+* ```typescript
+  declare function validateObject(o: object): object;
+
+  const result = validateObject( { firstname: "Klaus", age: 32} );
+    //  ^? result: object
+
+  ```
+* So käme ein _beliebiges_ oder _allgemeines_ Objekt zurück. Wir wissen aber eigentlich genauer, wie das Objekt aussieht, das zurückgeliefert wird.
+* ```typescript
+  const result = validateObject( { firstname: "Klaus", age: 32} );
+    //  präziser Rückgabetype wäre: { firstname: boolean, age: boolean }
+
+  ```
+* Mit einem Mapped Type können wir diese Regel auf Typ-Ebene dynamisch umsetzen, und so diesen präzisen Rückgabe-Typ erzeugen.
+---
+### Mapped Types
+* Um den Rückgabe-Typ von `validateObject` zu beschreiben, können wir einen eigenen Typen definieren (`ValidatedObject`)
+* Der `ValidatePerson`-Typ kann generisch beschrieben werden, so dass er _automatisch_ alle Properties
+  aus einem Typen enthält, deren Typ aber nun jeweils `boolean` ist. Für den konkreten Typen `Person` sähe das so aus:
+  * ```typescript
+      type Person = { firstname: string; age: number };
+      type ValidatedObject = {
+        [Key in keyof Person]: boolean
+      }
+
+      // ^?  { firstname: boolean; age: boolean }
+    ```
+* Den Ausdruck `keyof Person` kennen wir schon: hier wird ein Union Typ zurückgeliefert, der aus allen Keys des Objekts besteht
+* Mit `[Key in keyof Person]` wird an dieser Stelle über alle Keys in dem Objekt "iteriert" und der Typ des jeweiligen Keys in die Typ Variable `Key` geschrieben
+  * im Beispiel der `Person` wäre das also: `firstname` und dann `age`
+  * `Key` ist ein Variablenname, den ihr frei vergeben könnt.
+* Auf der rechten Seite vom Doppelpunkt steht (wie gewohnt) der Typ für das jeweilige Property (hier also: `boolean`)  
+
+---
+### Mapped Types
+* Natürlich können wir alle möglichen Veränderungen im Ziel-Objekt vorgenommen werden, z.B. auch `readonly` hinzugefügt, oder Felder optional gemacht werden:
+  * ```typescript
+    type ValidatedPerson = {
+      readonly [Key in keyof Person]?: boolean
+    }
+
+    //  ^?  { readonly firstname?: boolean, readonly age?: boolean }
+    ```
+* Es gibt bereits fertige [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) für eine Vielzahl typischer Anwendungsfälle,
+  z.B. [Partial](https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype), [Required](https://www.typescriptlang.org/docs/handbook/utility-types.html#requiredtype) oder [Readonly](https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype)
+
+---
+### Mapped Types #2
+* Im vorherigen Beispiel haben wir allen Einträgen eines Objekts einen fixen neuen Typen (`boolean`) zu gewiesen.
+* Es gibt aber auch Fälle, in denen der Typ eines Eintrags aus dem Typen des Originals abgeleitet werden soll.
+* In einer modifizierten Variante der `validate`-Funktion, liefert diese nun nicht mehr `boolean` zurück, sondern den Original-Wert eines Feldes oder `null`, falls dieser ungültig ist:
+* ```javascript
+  function validateField(value) {
+    // Validierungslogik...
+    return value; // oder null falls ungültig
+  }
+
+  function validateObject(object) {
+    // unverändert...
+  }  
+  ```
+* Wenn wir ein Objekt des `Person`-Typen validieren lassen, müsste der Rückgabe-Typ folglich so aussehen:
+* ```typescript
+  const result = validateObject( { firstname: "Klaus", age: 32} )
+     // ^?  { firstname: string | null, age: number | null }
+  ```
+---
+### Mapped Types #2  
+* Über den Index Access können wir beim Erzeugen des neuen Typen auf die ursprünglichen Typen der Properties des Original-Typen zugreifen
+* Damit können wir zum Beispiel einen Typen bauen, der alle Properties aus dem ursprünglichen Typen hat, diese sind aber im neuen Typen nullable:
+* ```typescript
+  type Person = {
+    firstname: string,
+    age: number
+  }
+
+  type ValidatedObject = {
+    [Key in keyof Person]: Person[Key] | null
+  }
+  // ^? { firstname: string | null, age: number | null }
+
+  declare function validate(p: Person): ValidatedObject;
+
+                                          
+  ```
+---
+### Mapped Types mit Generics
+
+* Unsere `validate`-Funktion soll eigentlich _beliebige_ Objekte validieren und nicht nur `Person`-Objekte.
+* Daher muss unser `ValidatedObject`-Typ _generisch_ sein und eine Typ-Variable verwenden
+* Die Typ-Variable gibt den zu transformierenden Typen an (z.B. `Person`)
+* Damit kannst Du _beliebige_ Typen in andere Typen transformieren:
+* ```typescript
+  type ValidatedObject<OBJECT extends object> = {
+    [Key in keyof OBJECT]: OBJECT[Key] | null
+  }
+
+  type ValidatedContact = ValidatedObject<{phone: string, mobile: boolean}>;
+        // ^? { phone: string | null, mobile: boolean | null }
+  ```
+* Wie muss die Signatur von der `validate`-Funktion jetzt aussehen? 🤔
+* ```typescript
+  declare function validate<O extends object>(o: O): ValidatedObject<O>;
+  
+  const person = { firstname: "Klaus", age: 123 };
+  const result = validate(person);
+        // ^? { firstname: string | null, age: number | null }
+
+  ```
+
+---
+### Übung Mapped Types:
+
+* Schreibe die Typ-Definitionen für eine weitere Variante der Validation-Funktion!
+* Der Aufrufer der validate-Funktion muss nun auch ein Objekt mit Validierungsregeln übergeben.
+  * Dieses Objekt soll alle Keys aus dem zu validierenden Objekt enthalten
+  * Diese sind jedoch dann die Validierungsfunktion
+* ```typescript
+    // In JavaScript
+    function validate(anObject, validators) { /* ... */ }
+
+    const person = {
+      firstname: "Klaus",
+      age: 32
+    }
+
+    const personValidators = {
+      firstname(f) { return f.length > 3 },
+      age(a) { return a < 18 }
+    }
+
+    const result = validate(person, personValidators);
+    // { firstname: true, age: false }
+  ```
+* In `src/390_uebung_mapped_type.ts` findest Du Ausgangsmaterial mit Hinweisen.
+* Mögliche Lösungen findest Du in `src/390s_uebung_mapped_type.ts`
+---
+### Übung Mapped Types    
+<!-- .slide: data-visibility="hidden" -->
+
+* <!-- .element: class="todo" -->Hinweisen: entweder Typ für Validator-Objekt erst bauen, oder die validator-Funktionen beim Aufruf der Methode angeben, sonst kann TS die Argumente nicht ableiten
+* <!-- .element: class="todo" -->deswegen erst `ValidatorsObjekt` bauen (lassen)
+* Die `validate`-Funktion soll zwei Parameter haben:
+  1. Das zu validierende Objekt 
+  2. Ein Objekt, das Funktionen zum Validieren enthält
+    - Für jedes Property aus dem zu validierenden Objekt soll es eine (Callback-)_Funktion_ geben, die so heißt, wie das Property
+    - Diese Funktion soll einen Parameter haben, der denselben Typ wie das Property hat und `true` oder `false` zurückliefern (wie gesehen)
+* Die `validate`-Funktion soll ein Objekt zurückliefern, das dieselben Keys wie das zu validierende Objekt hat. Die Typen sollen aber jeweils `boolean` und `readonly` sein.
+* Dann sollte folgendes funktionieren bzw. einen Fehler erzeugen:
+* **Optional:**
+  - Kannst Du die Signatur so bauen, dass das `validateFn`-Objekt eine Untermenge des zu validierenden Objekts ist? Man also für ein Feld im zu validierenden Objekt eine Validator-Callback-Funktion angeben kann oder nicht?
+<!-- .element: class="todo" -->todo: Lösung lieber in Übungsdatei, 
+* ```typescript
+const p = { firstname: "Klaus", lastname: "Meier", age: 32 };
+personValidator.age?.(7); // OK
+personValidator.age?.("fadfas"); // Argument of type 'string' is not assignable to parameter of type 'number'
+
+  ```
+---
+### Mögliche Lösung
+<!-- .slide: data-visibility="hidden" -->
+<!-- .slide: class="left" -->
+* ```typescript
+  // Ein Typ für das Ergebnis der validate-Funktion
+  type ValidationResult<O> = {
+    readonly [K in keyof O]: boolean;
+  };
+
+  // Typ für eine Validator Callback-Funktion
+  type ValidatorFunction<V> = (value: V) => boolean;
+
+  // Typ für das Objekt, das die Validator Callback-Funktionen enthält
+  type ValidatorObject<O extends object> = {
+    readonly [K in keyof O]: ValidatorFunction<O[K]>;
+  };
+
+  // die validateObjekt-Funktion
+  declare function validateObject<O extends object>(
+    o: O,
+    validators: ValidatorObject<O>
+  ) => ValidationResult<O>;
+
+  // Teil 2: Validator-Funktionen sind optional
+  declare function validateObject<O extends object>(
+    o: O,
+    validators: ValidatorObject<Partial<O>>
+  ) => ValidationResult<O>;  
+  ```
+
+---
+## Conditional Types
+<!-- .slide: id="t-conditional-types" -->
+### Conditional Types: 
+* Für Konstellationen, in denen ein Typ abhängig von einem anderen verwendet werden, gibt es _Conditional Types_.
+* Dazu ein Beispiel:
+  * Eine Funktion nimmt einen `string` oder `null` entgegen. 
+  * Wenn sie mit `string` aufgerufen wurde, soll sie dessen Länge zurückgeben (`number`)
+  * Wenn sie mit `null` aufgerufen wurde, soll sie `null` zurückliefern
+  * Ganz naiv geht das leider nicht:
+  * ```typescript
+    // So geht's nicht 😢
+    declare function getLength(s: string | null): number | null; 
+
+    const a = getLength("123"); // a: number | null 
+    const b = getLength(null); // b: number | null
+    ```
+
+---
+### Conditional Types
+
+* Mit [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) kannst Du abhängig von einer Bedingung einen Typen oder einen anderen Typen auswählen
+* Die Syntax dabei ist identisch mit dem ternären Operator (`?`) in JavaScript (`a === true ? "ja!" : "nein!"`)
+* Nur dass dabei _Typen_ statt _Werte_ angegeben werden:
+  * ```typescript
+    type NumberOrNull<O> = O extends string ? number : null;
+
+    type S = NumberOrNull<"huhu"> // N = number
+    type N = NumberOrNull<123> // N = null
+    type A = NumberOrNull<true>; // A = null
+    ```
+  * ```typescript
+    type IsPerson<O> = O extends { firstname: string, lastname: string} ? true : false
+    ```
+
+* Conditional Types lassen sich verschachteln (genau wie beim ternären Operator):
+  * ```typescript
+    type NumberOrStringOrNull<O> = O extends string ? number 
+                                 : O extends boolean ? string 
+                                 : null
+
+    type T1 = NumberOrStringOrNull<"huhu">; // T1 = string
+    type T2 = NumberOrStringOrNull<123>; // T2 = null
+    type T3 = NumberOrStringOrNull<true>; // T3 = string     
+    ```
+    
+---
+### Verwendung von Conditional Types
+    
+* Zurück zu der `getLength`-Funktion: 
+  * ```typescript
+    // So geht's immer noch nicht 😢
+    declare function getLength(s: string | null): number | null; 
+    ```
+* Mit Generics und einem Conditional Type lässt sich das nun umsetzen: 
+* ```typescript
+    declare function getLength<O extends string | null>(s: O): O extends string ? number : null;
+
+    const a = getLength("123"); // a: number
+    const b = getLength(null); // b: null
+  ```
+* Können wir einen `If-Then-Else`-Typen bauen, der uns den Conditional Type verallgemeinert? 🤔
+  * ```typescript
+    type IfThenElse<Current, I, T, E> = Current extends I ? T : E 
+
+    declare function getLength<O extends string | null>(s: O): IfThenElse<O, string, number, null>;
+    ```
+---
+### Conditional Types mit Union Types
+
+* Wenn Du einen _Union Type_ übergibst, wird die Überprüfung für jeden Typen aus dem Union Type durchgeführt und ein neuer Union Type zurückgeliefert:
+* ```typescript
+  type NumberOrNull<O> = O extends string ? number : null;
+  ```
+
+* ```typescript
+  type R = NumberOrNull<string | null | boolean>; 
+    // ^? = number | null:
+
+    // - 'string' wird zu 'number'
+    // - 'null' wird null (kein string)
+    // - 'boolean' wird null (kein string)
+  ```
+* Das ist also das gleiche (nur in kompliziert) wie:  
+* ```typescript
+  type R = NumberOrNull<string> | NumberOrNull<null> | NumberOrNull<boolean>;
+  ```
+  
+---
+### Conditional Types mit `never`
+* **Ein Beispiel:** eine Funktion, die sicherstellt, dass ein übergebener Wert nicht `null` ist
+  * Wenn der übergebene Wert `null` ist, wirft die Funktion einen Fehler
+  * Wenn der Wert nicht `null` ist, liefert die Funktion den Wert unverändert zurück
+* ```typescript
+  declare function ensureNotNull<O>(o: O): O;
+
+  // oder noch expliziter:
+  declare function ensureNotNull<O>(o: O | null): O;
+  ```
+  
+* In diesem Fall ist die Menge der potentiellen Rückgabe-Typen also _kleiner_ als die Menge der Eingabe-Typen:
+  - während als Eingabe _alle_ möglichen Typen erlaubt sind,
+  - sind als Rückgabe-Typen alle möglichen Typen _bis auf `null`_ möglich
+* Dazu müssen wir den `null`-Typen herausfiltern. Das können wir mit `never` machen.
+---
+### Conditional Types mit `never`
+* Wenn `never` in einem _Union Type_ vorkommt, wird dieser Typ "herausgefiltert"
+* ```typescript
+  type X = string | boolean | never; // X = string | boolean
+  ```
+* Das kanst Du nutzen, um mit einem Conditional Type aus einer Liste von Typen welche herauszufiltern
+* ```typescript
+  type NotNull<O> = O extends null ? never : O;
+
+  type T = NotNull<string>; T = string
+  type T1 = NotNull<string | null>; // T1 = string
+  type T2 = NotNull<string | boolean | null | undefined>; // T2 = string | boolean | undefined
+
+  // Macht hier kein Sinn, aber s. weiteres Beispiel später
+  type TX = NotNull<null>; // TX = never
+  ```
+* `extends` kann ebenfalls einen Union Typen aufnehmen.
+* Die Bedigungt ist dann wahr, wenn der geprüfte Typ _einem_ der in `extends` angegebenen Typen entspricht:
+
+* ```typescript
+  type NotNullOrUndefined<O> = O extends null | undefined ? never : O
+
+  type T3 = NotNullOrUndefined<string>; // T3 = string  
+  type T4 = NotNullOrUndefined<string | null>; // T4 = string
+  type T5 = NotNullOrUndefined<string | boolean | undefined>; // T5 = string | boolean
+  ```
+---
+### Conditional Types mit `never`
+
+* Damit können wir auch für die `ensureNotNull` korrekte Typen hinschreiben: 
+* ```typescript
+  type NotNull<O> = O extends null ? never : O
+
+  declare function ensureNotNull<O>(o: O): NotNull<O>;
+
+  const c = ensureNotNull("huhu"); 
+     // ^? string
+
+  // hier macht 'never' Sinn, da die Funktion hier nicht zurückkommt:
+  const b = ensureNotNull(null); 
+     // ^? never
+
+  ```
+
+---
+### Type Inference mit Conditional Types
+<!-- .slide: id="t-conditional-types-inference" -->
+
+
+* Mit einem Conditional Type können wir nicht nur Typen überprüfen, sondern auch Typen _extrahieren_ lassen
+* Beispiel:
+  * Eine Funktion nimmt einen Parameter entgegen
+  * Der Rückgabetyp soll dem Typen des Parameters entsprechen. Wie das geht, haben wir schon gesehen:
+  * ```typescript
+    declare function check<O>(o: O): O;
+    ```
+  * Wenn der übergebene Parameter aber selbst eine Funktion ist, soll deren(!) Rückgabetyp zurückgeliefert werden:
+  * ```typescript
+    check( () => 123 ); // Rückgabetyp soll number sein
+    check( () => "Hallo" ); // Rückgabetyp soll string sein
+    ```
+---
+###  Type Inference mit Conditional Types 
+  * Mit einem Conditional-Type können wir prüfen, ob etwas ein Funktion ist.
+  * Dazu schreiben wir als zu prüfenden Typ eine (allgemeine) Funktionssignatur hin:
+  * ```typescript
+    O extends (...args: any) => any ? /* Funktion */ : /* Keine Funktion */
+    ```
+* Wenn der Ausdruck des Conditional Types _true_ ist, wissen wir das es eine Funktion ist. In dem Fall können wir mit `infer` die Typen der Parameter
+  und/oder des Rückgabewertes extrahieren und in eine neue Typ-Variable schreiben lassen.
+  * ```typescript
+  O extends (...args: any) => infer A ? 
+     /* Funktion: hier haben wir jetzt O und A */ 
+     : 
+     /* Keine Funktion, nur O */
+    ```
+  * Das können wir nun nutzen, um unsere Anforderung umzusetzen:
+  * ```typescript
+    declare function check<O>(o: O): O extends (...args: any) => infer A ? A : O
+    ```
+---
+###  Type Inference mit Conditional Types 
+* Weitere Beispiele
+* ```typescript
+  // Rückgabe-Wert für eine Funktion ohne Parameter:
+  type RetValue<O> = O extends () => infer R ? R : never
+  ```
+* ```typescript
+  // Ermitteln des ersten Arguments einer Funktion:
+  type FirstArg<O> = O extends (a: infer A, ...args: any) => any ? A : never
+  ```
+* Was ist der Unterschied zu diesem Beispiel und warum sollte man das eine oder das andere machen? 🤔
+* ```typescript
+  type FirstArg<O extends (a: any, ...args: any) => any> = O extends (a: infer A, ...args: any) => any ? A : never
+  ```
+* Typ eines Arrays ermitteln:
+* ```typescript
+  type TypeOfArray<A> = A extends (infer A)[] ? A : never
+
+  type T1 = TypeOfArray<string[]> // string
+  type T2 = TypeOfArray<string>; // never
+  ```
+* Für typische Anforderungen gibt es bereits fertige _Utility Typen_, z.B.:
+  * [Awaited](https://www.typescriptlang.org/docs/handbook/utility-types.html#awaitedtype): Liefert Typ von Promises zurück
+  * [ReturnType](https://www.typescriptlang.org/docs/handbook/utility-types.html#returntypetype): Rückgabe-Typ einer Methode
+  * [InstanceType](https://www.typescriptlang.org/docs/handbook/utility-types.html#instancetypetype): Typ der Instanz einer Klasse
+  
+
+---
+### Übung: Conditional Types
+
+* Erweitere die `validate`-Funktion
+  - Wenn der Typ einer Eigenschaft im Original-Objekt eine Funktion ist, soll deren Rückgabe-Type (oder null) im `ValidatedObject` auftauchen
+  - Fachlicher Hintergrund: beim Validieren des Objektes werden daran enthaltenen Funktionen ausgeführt und dann deren Rückgabetyp validiert.
+* ```typescript
+  type Person = {
+    firstname: string;
+    age: number;
+    hobbies: () => string[]
+  }
+
+  type ValidatedPerson = {
+    firstname: string | null;
+    age: number | null;
+    hobbies: string[] | null; // 'string[]' ist Rückgabe-Typ von Person.hobbies
+  }
+  ```
+* Material findest Du in `src/490_uebung_conditional.ts`
+* Mögliche Lösung in `src/490s_uebung_conditional.ts`
+---
+<!-- -------------------------------------------------------------- -->
+<!--    TEMPLATE LITERAL TYPES                                      -->
+<!-- -------------------------------------------------------------- -->
+
+## Template Literal Types
+<!-- .slide: id="t-template-literale" -->
+---
+### Hintergrund: Literal Types
+<!-- .slide: class="left" -->
+* Zur Erinnerung: ein konkreter String kann ein Typ in TypeScript sein.
+* Damit können wir zum Beispiele eine Art Aufzählungstyp bauen, um sicherzustellen, dass nur semantisch korrekte Strings
+  an einer Stelle verwendet werden:
+* ```typescript
+  type Direction = "top" | "right" | "bottom" | "left";
+
+  declare function setMargin(d: Direction, size: string): void;
+
+  setMargin("top", "2rem"); // ok
+  setMargin("middle", "2rem"); // ERR: Argument of type '"middle"' is not 
+                               //      assignable to parameter of type 'Direction'
+  ```
+- Hier kann die `setMargin`-Funktion als `d` nur die String-Werte `top`, `right`, `bottom`, oder `left` entgegennehmen.
+- Der zu setzende Wert (`size`) wird als beliebiger String übergeben.
+- Wie können wir sicherstellen, das auch der zweite String nicht beliebig ist, sondern dem Format `Größe + Einheit` enstpricht (`2rem`, `24px`, ...)
+---
+### Template Literal Types
+<!-- .slide: class="left" -->
+- Analog zu einem Template String in JavaScript können wir in TypeScript mit einem [Template Literal Type](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) "Regeln" für String-Typen beschreiben.
+- Dazu verwenden statt der Anführungszeichen die Backticks (`` ` ``) und können darin wie in JavaScript mit `${...}` Platzhalter definieren.
+- In die Platzhalter werden dann erlaubte Werte(mengen) eingesetzt.
+- Die Größenanabge für `setMargin` soll sich aus einer Zahl (`number`) und einer Einheit (`string`) zusammensetzen und könnte im ersten Schritt so definiert werden:
+* ```typescript
+  type Size = `${number}${string}`
+
+  declare function setMargin(d: Direction, size: Size): void;
+
+  setMargin("top", "2rem"); // OK
+  setMargin("top", "XL"); // ERR
+  setMargin("top", "A4"); // ERR
+  setMargin("top", "2"); // OK (Leerstring...)
+  ```
+---
+### Template Literal Types
+ 
+* Wie können wir Ausdrücken, dass die Einheit nur `em`, `rem` oder `px` sein darf?  
+  * Wir erlauben nicht mehr beliebige String mit `${string}`, sondern schreiben explizit die erlaubten Strings hin:
+  * ```typescript
+    type Size = `${number}em` | `${number}rem` | `${number}px`
+
+    declare function setMargin(d: Direction, size: Size): void;
+
+    setMargin("top", "2em"); // OK
+    setMargin("top", "1.5rem"); // OK
+    setMargin("top", "24pt"); // ERR
+    setMargin("top", "2"); // ERR
+    ```
+---
+### Template Literal mit Union Types
+ 
+* Der gesehene `Size`-Typ funktioniert, kann bei vielen Ausprägungen aber unübersichtlich werden
+* Wir können stattdessen für die Einheit selbst einen Union Typen verwenden, der die erlaubten Einheiten beschreibt
+* Wenn ihr einen Union Type in einem Template Literal einsetzt, enthält der neue Typ alle Kombinationen aller enthalten Union Types:
+* ```typescript
+  type Unit = "em" | "rem" | "px"
+  type Size = `${number}${Unit}`
+  // oder: 
+  // type Size = `${number}${"em" | "rem" | "px"}`
+
+  declare function setMargin(d: Direction, size: Size): void;
+
+  setMargin("top", "2em"); // OK
+  setMargin("top", "1.5rem"); // OK
+  setMargin("top", "24pt"); // ERR
+  setMargin("top", "2"); // ERR
+  ```
+---
+### Template Literal mit Union Types
+* Als weiteres Beispiel soll eine Verallgemeinerung von `setMargin` dienen.
+* Diese Funktion soll jetzt  `margin` oder `padding` setzen können.
+* Die Angabe soll dabei (wie in CSS) als String mit Direction erfolgen.
+* Hier können wir zwei Union Types in unser Template Literal einsetzen. 
+* ```typescript
+  type Spacing = "margin" | "padding";
+  type Direction = "top" | "right" | "bottom" | "left";
+  type CSSClassNames = `${Spacing}-${Direction}`;
+
+  type Size = `${number}${"em" | "rem" | "px"}`
+
+  declare function setSpacing(c: CSSClassNames, size: Size): void;
+
+  setSpacing("margin-right", "2rem");  // OK
+  setSpacing("padding-center", "2rem"); // ERROR
+  ```
+---
+### String Manipulation in Template Literal Types
+
+* Nehmen wir an, wir wollen für fiktive Events den Namen ihrer `addListener`-Funktion ermitteln
+  * Die `addListener`-Funktion soll den Event-Namen in ihrem Namen tragen
+  * Das könnte folgende Regel auf Wert-Ebene sein:
+  * ```typescript
+    const changeEvent = "change";
+    const changeListenerName = "addChangeListener"
+
+    const insertEvent = "insert";
+    const insertListenerName = "addInsertListener"
+    ```
+* Prinzipell könnten wir dafür folgenden Typen definieren:
+* ```typescript
+  type ListenerName<E extends string> = `add${E}Listener`;
+  ```
+* Dann ist allerdings der Event-Name falsch geschrieben (Kleinbuchstabe!):
+* ```typescript
+  type ChangeListenerName = ListenerName<"change">;
+        // ^?  addchangeListener
+  const changeListenerName: ChangeListenerName = "addChangeListener"    
+        // ERROR: Type '"addChangeListener"' is not assignable to type '"addchangeListener"'
+  ```
+* Wir müssen also den ursprünglichen String manipulieren
+---
+### String Manipulation in Template Literal Types
+* Um einen String-Typen zu manipulieren, stellt TypeScript [einige Hilfstypen](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html#intrinsic-string-manipulation-types) zur Verfügung:
+* `Uppercase`
+* ```typescript
+  type S = UpperCase<"change"> // "CHANGE"
+  ```
+* `Lowercase`
+* ```typescript
+  type S = UpperCase<"CHANGE"> // "change"
+  ```
+* `Capitalize`
+* ```typescript
+  type S = Capitalize<"change"> // "Change"
+  ```
+* `Uncapitalize`
+* ```typescript
+  type S = Uncapitalize<"Change"> // "change"
+  ```  
+* Damit können wir unseren Typen nun korrekt ausdrücken!
+* ```typescript
+  type ListenerName<E extends string> = `add${Capitalize<E>}Listener`;
+
+  type ChangeListenerName = ListenerName<"change">;
+        // ^?  addChangeListener 😊
+
+  const changeListenerName: ChangeListenerName = "addChangeListener" ✅
+  ```
+---
+### Übung: Template Literal Types
+<!-- .slide: class="left" -->
+* Erweitere den `Spacing` bzw. `CSSClassnames`-Typen, so dass er einem (mehr oder weniger) kompletten, gültigen CSS-Ausdruck entspricht:
+  * `setSpacing("margin-right: 2rem")` ✅
+  * `setSpacing("margin-middle: 2rem")` ❌
+  * `setSpacing("padding-top: 24pt")` ❌
+* Schreibe einen Typen, der ein `Spacing` und eine `Direction` 
+  entgegennimmt, und einen String ausdrückt, der die beiden Typen als PascalCase enthält
+  (`"margin"`,`"top"`) => `"MarginTop"`
+* In `src/590_template_literal_uebung.ts` findest Du das Material mit Hinweisen.
+* Mögliche Lösung in `src/590s_template_literal_uebung.ts`  
+
+---
+### Übung 2 (muss später)
+<!-- .slide: data-visibility="hidden" -->  
+* Etwas trickreich:
+  * Schreibe einen `SwapCapitalize`-Typen, der einen `string` entgegennimmt 
+    - Wenn der String mit einem Großbuchstaben anfängt, soll der String mit Kleinbuchstaben zurückgeliefert werden, sonst umgekehrt
+  * ```typescript
+    type SwapCapitalize<S extends string> = ???;
+
+    type A = SwapCapitalize<"addListener">;
+      // ^?  "AddListener"
+
+    type B = SwapCapitalize<"AddListener">;
+      // ^?  "addListener"
+    ```
+---
+### Lösung: Template Literal Types (muss später)
+<!-- .slide: data-visibility="hidden" -->
+<!-- .slide: class="left" -->
+* CSS Ausdruck:
+* ```typescript
+  type CSSExpression = `${CSSClassNames}:${Size}`
+  function setSpacing(c: CSSExpression) {}
+  setSpacing("margin-right: 2rem"); // OK
+  setSpacing("margin-middle: 2rem"); // ERR
+  setSpacing("padding-top: 24pt"); // ERR
+  ```
+ 
+* Swap
+  * ```typescript
+    type Swap<S extends string> = S extends Capitalize<S> ? Uncapitalize<S> : Capitalize<S>
+
+    type A = Swap<"addListener">;
+      // ^?  "AddListener"
+
+    type B = Swap<"AddListener">;
+      // ^?  "addListener"  
+    ```
+
+---
+### Keys mit Template Literal Types umbenennen
+<!-- .slide: id="t-template-literale-remapping" -->
+
+- Wenn ihr einen _Key_ in einem Mapped Type umbenennen wollt, könnt ihr das mit einem Template Literal Type tun
+* Fachliches Beispiel:
+  - Die schon gesehene `createSetter`-Funktion liefert Setter-Funktionen für ein ganzes Objekt (`anObject`) zurück
+  - Dazu gibt `createSetter` ein Objekt zurück, in dem für jedes Feld in `anObject` eine Setter-Funktion enthalten ist
+  - Die Keys im `setter`-Objekt sollen nun allerdings `setFieldname` und nicht mehr `fieldname` heissen:
+  * ```typescript
+    function createSetter(observedObject) { /* ... */ }
+    const setters = createSetter( { firstname: "klaus", age: 32} ) ;
+           // setters: { setFirstname(newValue) { /* ... */ }, setAge(newValue) { /* ... */ } }
+    // Ändern des Vornamens:
+    setters.setFirstname("Moni");
+    ```
+* 👉 Der zurückgelieferte Typ muss also die Keys aus dem `observedObject` umbenennen.
+  * Wir brauchen konzeptionell also so etwas:
+  * ```typescript
+    type SetterObject<O extends object> = {
+      [Key in keyof O]: (newValue: O[K]) => void;
+      // ^-- Hier muss Key umbenannt werden in `set${Capitalize<Key>}`
+    }
+    ```
+---
+### Keys mit Template Literal Types umbenennen
+
+* Grundsätzlich können bei Mapped Types die Keys umbenannt werden
+* Zur Erinnerung: `keyof` liefert eine Liste von _Typen_ zurück (auch wenn diese meist wie "normale" Strings aussehen):
+* ```typescript
+  type KeysInPerson = keyof Person; // "firstname" | "age"
+                                          ^------------^---- Typen! Keine Werte! Keine Strings!
+  ```
+* Um einem Key einen neuen Namen zu ändern, müssen wir also dessen _Typ_ verändern
+* Das kann man mit einem Type Cast (`as`) machen
+* In Kombination mit einem Template Listeral Type zum Beispiel so
+  * ```typescript
+    // Achtung! Beispiel funktioniert so noch NICHT
+    type SetterObject<O extends object> = {
+      [Key in keyof O as `set${Capitalize<Key>}`]: (newValue: O[K]) => void;
+    }
+    ```
+* Das funktioniert aber so noch nicht!
+* Es gibt Compile-Fehler:
+  * Im Template Literal dürfen wir nur string, boolean, null etc. angeben aber kein `Symbol`
+  * `Capitalize` erwartet sogar nur einen `string`
+
+---
+###  Keys mit Template Literal Types umbenennen
+* Ein Template Literal Type kann nur mit dem Typ `string | number | bigint | boolean | null | undefined` arbeiten
+* Der `Capitalize` ist noch restriktiver: dieser kann nur mit einem `string` verwendet werden
+* Ein Eintrag in `keyof` kann neben `string` aber auch `number` oder `symbol` sein, weil diese als Keys an Objekten verwendet werden können
+* ```typescript
+  const person = {
+    firstname: "Klaus",
+    2: "zwei",
+    [Symbol()]: "geheim",
+  };
+  ```
+* Wir müssen also die Typen aus `keyof` rausfiltern, die keine Strings sind
+* Wie könnten wir das mit einem Union Type und `never` machen? 🤔
+* ```typescript
+  type StringKeysOf<O extends object, K = keyof O> = K extends string ? K : never
+  ```
+* Es gibt eine andere Alternative...
+---
+### Exkurs: Intersection und Union Types
+<!-- .slide: id="t-intersection-und-union-types" -->
+
+* Ein _Intersection Type_ stellt eine "Überschneidung" aus zwei Typen dar.
+* ```typescript
+    type Person = { firstname: string; age: number }
+    type Address = { city: string; street: string }
+
+    type PersonWithAddress = Person & Address; // Intersection type
+  ```
+* Da der Typ `PersonWithAddress` die Gemeinsamkeiten von `Person` und `Address` darstellt, müssen auch alle Eigenschaften beim Instaniieren des Typs angegeben werden:
+* ```typescript
+  const p: PersonWithAddress = { 
+    firstname: "Klaus", age: 32,
+    city: "Hamburg", street: "Reeperbahn"
+   };
+  ```
+* Der Verwender dieses Typs kann sich dann aber darauf verlassen, alle Eigenschaften von `Person` _und_ `Address` zu haben:
+* ```typescript
+  function sendLetter(p: PersonWithAddress) {
+    p.firstname.toUpperCase(); // OK
+    p.city.toUpperCase(); // OK
+  }
+  ```
+* Bei einem _Union Typen_ ist es genau andersrum.
+---
+### Exkurs: Intersection und Union Types
+* Ein _Union Type_ enthält die Eigenschaften aus dem einen _oder_ dem anderen Typen:
+* ```typescript
+  type Person = { firstname: string; age: number }
+  type Animal = { name: string; species: string }
+
+  type PersonOrAnimal = Person | Animal;
+  ```
+* Um ein `PersonOrAnimal` zu erzeugen, reicht es, die Eigenschaften von `Person` _oder_ `Animal` anzugeben:
+* ```typescript
+  type klaus: PersonOrAnimal = { firstname: "Klaus", age: 32 };
+  ```
+* Der Verwender kann sich dann nicht sicher sein, welche Eigenschaften er hat (`Person`, `Animal` oder beide), und muss einen entsprechenden _Type Guard_ prüfen, welche Ausprägung vorliet:
+* ```typescript
+  function sayHello(p: PersonOrAnimal) {
+
+    // p ist hier Person | Animal
+
+    p.firstname.toUpperCase(); // ERROR: Property 'firstname' does not exist on type 'PersonOrAnimal'.
+                               //         Property 'firstname' does not exist on type 'Animal'
+
+    if ("firstname" in p) {
+
+      // p ist hier nun Person  
+      p.firstname.toUpperCase(); // OK
+        
+    }                               
+  }
+
+  ```
+---
+### Exkurs: Intersection und Union Types
+* Was passiert nun, wenn beide Typen kombiniert werden? 🙀
+* ```typescript
+  type ColorsOfFrance = "blue" | "white" | "red"
+  type ColorsOfSwiss = "red" | "white";
+
+  type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
+         // ^? ???
+  ```
+* Richtig ist die gemeinsame _Schnittmenge_ der Farben:
+  * ```typescript
+    type ColorsOfSwissAndFrance = ColorsOfSwiss & ColorsOfFrance
+            // ^? "red" | "white"
+    ```
+  * Wenn es nicht die Schnittmenge wäre, sondern die Menge aller Ausprägungen aller Union Typen (`"blue" | "white" | "red"`), könnten wir einen Typen 
+erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:   
+  * ```typescript
+  type AllColorsOfSwissAndFrance = "blue" | "white" | "red";
+  const c: AllColorsOfSwissAndFrance = "blue";
+  const f: ColorsOfFrance = c; // OK
+  const s: ColorsOfSwiss = c; // ERR Type '"blue"' is not assignable to type 'ColorsOfSwiss'
+  ```
+---
+### Exkurs: Intersection und Union Types
+* Was passiert, wenn diese beide Typen kombiniert werden? 🙀
+* ```typescript
+  type StringOrNum = string | number;
+  type StringOrBoolean = string | boolean
+  type StringOrNumAndStringOrBoolean = StringOrNum & StringOrBoolean
+         // ^? ???
+  ```
+  * Ebenfalls die Schnittmenge, gleicher Fall wie vorher nur mit anderen Typen:
+* ```typescript
+  type StringOrNumAndString = StringOrNum & string
+        // ^? string
+  type StringOrNumAndStringOrBoolean = StringOrNum & StringOrBoolean
+        // ^? string
+```
+* Und nun die Keys aus unserem `Person`-Objekt:
+* ```typescript
+  type Person = { firstname: string, 2: [Symbol()]: "geheim" }
+
+  type KeysOfPerson = keyof Person; 
+         
+  type KeysOfPersonAndString = KeysOfPerson & string
+         // ^? ???
+  ```
+  * Ebenfalls selbes Prinzip, nur das der Union Typ diesmal aus `keyof` kommt:
+    * ```typescript
+      type KeysOfPerson = keyof Person; 
+        // ^?  "firstname" | 2 | symbol;
+
+      type KeysOfPersonAndString = KeysOfPerson & string
+        // ^? "firstname"
+      ```
+
+
+---
+###  Keys mit Template Literal Types umbenennen
+* Alle Keys die nicht vom Typ `string` sind, werden damit rausgefiltert und sind im neuen Objekt nicht vorhanden.
+* ```typescript
+  type SetterObject<O extends object> = {
+    [Key in keyof O & string as `set${Capitalize<Key>}`]: (newValue: O[Key]) => void;
+  }
+  ```
+  
+* ```typescript
+  declare function createSetter<O extends object>(o: O): SetterObject<O>;
+
+  const setters = createSetter( { firstname: "klaus", age: 32} ) ;
+  // Ändern des Vornamens:
+  setters.setFirstname("Moni"); // ✅
+  setters.firstname("Moni"); // ❌
+  ```
+* Ob das Entfernen der nicht-String-Keys korrekt ist, ist eine fachliche Frage
+  * Was könnten wir stattdessen tun? 🤔 
+
+---
+### Übung: Template Literal Types
+
+* Modifiziere den Typen für die `validate`-Funktion
+*  In dem Objekt mit den `validator`-Funktionen sollen die Namen der Keys jeweils mit `validate` anfangen:
+  * `lastname` => `validateLastname`
+  * `age` => `setAge`
+* **Optional**:
+  * In dem validate-Objekt sollen keine validator-Funktionen erlaubt sein, wenn der Eintrag im 
+  zu validierenden Objekt eine void-Funktion ist 🤯
+  * ```typescript
+    const person = { age: 32, sayHello: () { /* void-Funktion! */ } };
+    // im validator-Objekt muss ein Eintrag für `age` (`validateAge`) vorhanden sein,
+    // aber KEIN Eintrag für `sayHello`
+    ```
+* Hinweise und Vorlagen findest Du in `690_template_literal_remapping_uebung.ts`
+* Mögliche Lösungen findest Du in `690s_template_literal_remapping_uebung.ts`  
+
+
+---
+### Ausblick: Conditional Types mit Template Literal Types
+<!-- .slide: id="t-template-literale-conditional-types" -->
+
+<!-- .slide: class="left" -->
+* Mit einem Conditional Type können wir prüfen, on ein Typ einem (String-)Muster entspricht
+* ```typescript
+  type IsAddListenerName<S> = S extends `add${string}Listener` ? true : false;
+
+  type IsChangeListener = IsAddListenerName<"addChangeListener">; // true
+  type IsUpdateListener = IsAddListenerName<"updateListener">; // false
+  ```
+* Das `${string}` matched auf einen beliebigen String (gleiches geht mit `${boolean}` oder `${number}`)
+* Es können auch Platzhalter übergeben werden:
+* ```typescript
+  type IsAddListenerForEventName<S, E> = S extends `add${Capitalize<E>}Listener` ? true : false;
+
+  type IsChangeListener = IsAddListenerForEventName<"addChangeListener", "change">; // "true"
+  type IsChangeOrUpdateListener = IsAddListenerForEventName<"addChangeListener", "change" | "update">; // "true"
+  type IsUpdateListener = IsAddListenerForEventName<"addChangeListener", "update">; // "false"
+  ```
+* Natürlich geht das auch mit Constraints:
+* ```typescript
+  type Event = "change" | "update";
+  type IsAddListenerForEventName<S extends string, E extends Event> = 
+                                     S extends `add${Capitalize<E>}Listener` ? true : false;
+  // Verwendung wie oben
+  ```
+* ...oder mit Defaults:
+* ```typescript
+  type Event = "change" | "update";
+  type IsAddListenerForEventName<S extends string, E extends Event = "change"> = 
+                                     S extends `add${Capitalize<E>}Listener` ? true : false;
+  type IsChangeListener = IsAddListenerForEventName<"addChangeListener">; // "true"
+  type IsUpdateListener = IsAddListenerForEventName<"addUpdateListener">; // "false"
+    ```
+
+---
+### Template Literal Types mit infer
+<!-- .slide: class="left" -->
+* Mit dem `infer` Schlüsselwort könnt ihr Euch den "eingesetzten" Teil in eine Typ-Variable extrahieren lassen
+  * Analog zu dem, was wir zuvor schon bei den Conditional Types gesehen haben:
+* ```typescript
+  type GetEventNameFromListener<S extends string> = S extends `add${infer EN}Listener` ? Uncapitalize<EN> : never;
+    
+  type ChangeEvent = GetEventNameFromListener<"addChangeListener">; // "change"
+  type NoChangeEvent = GetEventNameFromListener<"addChangeHandler">; // never
+  ```
+* Auch die Platzhalter lassen sich mit Constraints kombinieren:
+* ```typescript
+  type GetEventNameFromListener<S extends string> 
+         = S extends `add${infer EN extends Event}Listener` ? Uncapitalize<EN> : never;
+
+  type ChangeEvent = GetEventNameFromListener<"addChangeListener">; // "change"
+  type NoEvent = GetEventNameFromListener<"addInsertListener">; // never
+  type NoListener = GetEventNameFromListener<"addChangeHandler">; // never
+  ```
+* Damit lassen sich sehr mächtige Dinge bauen, z.B. [SQL "Datenbanken"](https://github.com/codemix/ts-sql) 🤯 
+---
+### Übung Template Literal Types mit infer
+* Ein Typ `S` besteht aus zwei Wörtern, die mit Bindestrich getrennt sind (z.B. `"margin-left"` oder `"padding-right"`)
+* Baue einen Typen, der den Inhalt von `S` in camelCase-Notation zurückliefert ("`marginLeft"` oder `"paddingRight"`)
+* Wenn der übergebene Typ nicht dem Muster (`string1-string2`) entspricht, liefer den Typen unverändert zurück oder gib `never` zurück
+* Beispiel
+  * ```typescript
+    type CamelCase<S extends S> = /* ... */
+    
+    const marginLeft:CamelCase<"margin-left"> = "marginLeft"; ✅
+    const paddingRight:CamelCase<"padding-right"> = "paddingRight"; ✅
+    const paddingTop:CamelCase<"paddingTop"> = "paddingTop"; ✅ // (alternativ: never)
+    ```
+* Erweiterung 1: Kannst Du den Typen so bauen, dass er aus beliebig vielen Wörtern camelCase erzeugt?
+* ```typescript
+    const background:CamelCase<"background"> = "background"; ✅
+    const marginLeft:CamelCase<"margin-left"> = "marginLeft"; ✅
+    const maxPageWidth:CamelCase<"max-page-width"> = "maxPageWidth"; ✅
+  ```
+* Erweiterung 2: Kannst Du den Typen so erweitern, dass man das Trennzeichen festlegen kann?  
+* ```typescript
+  const marginLeft:CamelCase<"margin-left", "-"> = "marginLeft"; ✅
+  const helloWorld:CamelCase<"hello world", " "> = "helloWorld"; ✅
+  ```
+---
+### Lösungen
+<!-- .slide: class="left" -->
+* Zwei Wörter, mit Bindestrich getrennt:
+  * ```typescript
+    type ToCamelCase<S> = S extends `${infer left}-${infer right}`
+      ? `${left}${Capitalize<right>}`
+      : S;
+    ```
+* "Rekursiv", beliebige Anzahl an Wörtern mit Bindestrich getrennt: 
+  * ```typescript
+    type ToCamelCase<S> = S extends `${infer left}-${infer right}`
+      ? ToCamelCase<`${left}${Capitalize<right>}`>
+      : S;
+    ```
+* "Rekursiv" und mit variablem Trennzeichen:
+  * ```typescript
+    type ToCamelCase2<
+      S,
+      D extends string = "-" // D ist das Trennzeichen, per Default auf "-" vorbelegt
+    > = S extends `${infer left}${D}${infer right}`
+      ? ToCamelCase<`${left}${Capitalize<right>}`>
+      : S;
+    ```
+
+
+          </textarea>
+        </section>
+        <section>
+          <h2>Geschafft! 😊</h2>
+          <h3>Vielen Dank für Eure Teilnahme!</h3>
+          <h3>Viel Spaß und Erfolg mit TypeScript!</h3>
+          <p>Wenn ihr noch Fragen habt, könnt ihr mich erreichen:</p>
+          <p>
+            Mail:
+            <a href="mailto:nils@nilshartmann.net">nils@nilshartmann.net</a>
+          </p>
+          <p>
+            Web:
+            <a href="https://nilshartmann.net" target="_blank"
+              >https://nilshartmann.net</a
+            >
+          </p>
+          <p>
+            Twitter:
+            <a href="https://twitter.com/nilshartmann" target="_blank"
+              >@nilshartmann</a
+            >
+          </p>
+          <p>
+            Mastodon:
+            <a href="https://norden.social/@nilshartmann" target="_blank"
+              >@nilshartmann@norden.social
+            </a>
+          </p>
+        </section>
+      </div>
+    </div>
+
+    <script src="slides/revealjs/reveal.js/dist/reveal.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/notes/notes.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/markdown/markdown.js"></script>
+    <script src="slides/revealjs/reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="slides/revealjs/config.js"></script>
+  </body>
+</html>
