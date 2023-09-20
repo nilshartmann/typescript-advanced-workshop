@@ -67,12 +67,7 @@ const result = validate(
 // Probiere, ob du diesen Typen bauen kannst (statt "any"),
 // so dass die darauffolgenden Zeilen sich korrekt verhalten:
 
-// type ExcludeVoidFunction<F> = any;
-type ExcludeVoidFunction<F> = F extends (...args: any) => infer A
-  ? A extends void
-    ? never
-    : A
-  : F;
+type ExcludeVoidFunction<F> = any;
 
 declare function setValue(): void;
 declare function getValue(): number;

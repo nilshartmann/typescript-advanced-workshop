@@ -68,15 +68,13 @@
           <div>
             <h3><span class="transparent-bg">Slides</span></h3>
             <p>
-              <span class="transparent-bg">Lokal: 2023-jsdays.html</span>
+              <span class="transparent-bg">Lokal: 2023-wdc.html</span>
             </p>
             <p>
               <span class="transparent-bg"
                 >Remote:
-                <a
-                  href="https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html"
-                >
-                  https://nilshartmann.github.io/typescript-advanced-workshop/2023-jsdays.html</a
+                <a href="https://react.schule/wdc2023-typescript">
+                  https://react.schule/wdc2023-typescript</a
                 ></span
               >
             </p>
@@ -126,26 +124,6 @@
           </div>
         </section>
 
-        <!-- Das Typsystem von TypeScript hilft uns in der täglichen Arbeit, typische Programmierfehler zu vermeiden. 
-          Dazu schreiben wir Typ-Angaben zum Beispiel an Variablen oder Funktionsargumente. 
-          Die Beschreibung der Typen selbst ist aber gar nicht immer so trivial. 
-          Durch das dynamische Typsystem von JavaScript kann eine Funktion beispielsweise ein beliebiges Objekt entgegennehmen und in 
-          einer abgeleiteten Form zurückgeben. 
-          Für diese Herausforderung bringt TypeScript eine Art Meta-Sprache mit, mit der sich Typen an Hand verschiedener 
-          Regeln programmieren lassen. Damit lassen sich auch für komplexe Anwendungsfälle, zum Beispiel APIs von Bibliotheken, 
-          Typen beschreiben, so dass Nutzerinnen und Nutzer der Funktionen vollständige Typsicherheit haben - 
-          ohne selbst Typdefinitionen schreiben zu müssen.
-
-
-        In diesem Workshop sehen wir uns diese Meta-Sprache an Hand von Beispielen in der Praxis an. 
-        Wir werden unter anderem Mapped Types, Utility Types und Conditional Types untersuchen und sehen, 
-        für welche Anwendungsfälle sie jeweils geeignet sind.
-         Dazu machen wir natürlich auch Übungen, so dass Du das Gelernte direkt Hands-on ausprobieren kannst. 
-         Für den Workshop solltest Du grundsätzliche TypeScript-Kenntnisse mitbringen. 
-        
-        https://javascript-days.de/javascript/advanced-typescript/
-        -->
-
         <!-- ######################################################  -->
         <section data-markdown>
           <textarea data-template>
@@ -153,7 +131,7 @@
 * Bitte klont das Repository: https://github.com/nilshartmann/typescript-advanced-workshop
 * Im Root-Verzeichnis `npm install` ausführen, dann wird TS 4.9 installiert
 * In Eurer IDE/Editor sicherstellen, dass diese Version auch verwendet wird
-* Die Slides findet ihr im Root-Verzeichnis: `2023-jsdays.html`
+* Die Slides findet ihr im Root-Verzeichnis: `2023-wdc.html`
   * Die könnt ihr im Brower öffnen
 * Im `src`-Verzeichnis findet ihr (fast) alle Beispiele aus den Slides auch im Quellcode
 * Wir machen aber gemeinsam Übungen, dann habt ihr Zeit, Dinge selbst auszuprobieren
@@ -680,7 +658,38 @@ beliebigen Objektes zurückliefern.
         // ^? { firstname: string | null, age: number | null }
 
   ```
+---
+### Exkurs: "Flattening von Typen"
+* Beim Bauen von Typen, z.B. durch Intersections, wird die Darstellung des erzeugen Typen ab und an "unübersichtlich":
 
+* ```typescript
+    interface A {
+      firstname: string;
+    }
+    
+    type B = A & {
+      lastname: string;
+    };
+
+    // ^? type B = A & { lastname: string }
+
+    // schöner wäre: type B = { firstname: string, lastname: string}
+    ```
+* Es gibt mehrere "Tricks", wie man dieses Verhalten erzeugen kann. Für mich funktionier am besten dieser Utility Typ:
+* ```typescript
+  type Flatten<O, T extends keyof O = keyof O> = {
+    [P in T]: O[P];
+  };
+  ```
+* ```typescript
+  type Flatten_B = Flatten<B>
+  //          ?^  type Flatten_B = { firstname: string, lastname: string}
+  ```
+* oder, selbes Ergebnis, direkt beim Erzeugen des Typen verwenden:
+  ```typescript
+    type B = Flatten<A & { lastname: string }> 
+  ```
+  
 ---
 ### Übung Mapped Types:
 
@@ -707,6 +716,7 @@ beliebigen Objektes zurückliefern.
   ```
 * In `src/390_uebung_mapped_type.ts` findest Du Ausgangsmaterial mit Hinweisen.
 * Mögliche Lösungen findest Du in `src/390s_uebung_mapped_type.ts`
+
 ---
 ### Übung Mapped Types    
 <!-- .slide: data-visibility="hidden" -->
@@ -1536,6 +1546,13 @@ erzeugen, der hinterher nicht mehr an `ColorsOfSwiss` zuweisbar wäre:
             <a href="https://nilshartmann.net" target="_blank"
               >https://nilshartmann.net</a
             >
+          </p>
+          <p>
+            <a
+              href="https://www.linkedin.com/in/nils-hartmann-2a5738252/"
+              target="_blank"
+              >LinkedIn
+            </a>
           </p>
           <p>
             Twitter:

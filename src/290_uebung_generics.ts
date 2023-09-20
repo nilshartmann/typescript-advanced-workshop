@@ -15,6 +15,7 @@ export default undefined;
 
 * Der Rückgabe-Typ soll eine Funktion sein, die ihrerseits ein Argument hat, das vom Typ des Properties aus dem übergebenen
   Objekt (`someObject`) ist, so dass diese Funktion aufgerufen werden kann, um den Wert des Objektes zu setzen. 
+  - Tipp: hier musst Du mit dem 'index access'-Operator' arbeiten...
 
 * In JavaScript sähe das so aus:
     function createSetter(someObject, aKey) { ... } 
@@ -25,10 +26,10 @@ export default undefined;
 * In TypeScript sollten dann folgende Beispiele funktionieren bzw. einen Fehler auslösen:
   const person = { firstname: "Klaus", age: 32 }
 
-  createSetter(person, "firstname")("newFirstName"); // OK
-  createSetter(person, "xxx")("newFirstName"); // Argument of type '"xxx"' is not assignable to parameter of type '"firstname" | "age"
-  createSetter(person, "age")(33); // OK
-  createSetter(person, "age")("33"); // ERR // Argument of type 'string' is not assignable to parameter of type 'number'
-  createSetter("Klaus", "klaus"); // Argument of type 'string' is not assignable to parameter of type 'object'
+  createSetter(person, "firstname")("newFirstName"); // 'firstname' gibt an 'person', und "newFirstName" ist korrekter Typ (string)
+  createSetter(person, "xxx")("newFirstName"); // ERR: "xxx" gibt es nicht an 'person'
+  createSetter(person, "age")(33); // OK, 'age' gibt es an 'person' und 33 ist korrekter Typ (number)
+  createSetter(person, "age")("33"); // ERR 'age' gibt es an 'person', aber "33" (string) ist falscher Typ
+  createSetter("Klaus", "klaus"); // Error: erster Parameter "Klaus" ist kein Objekt
 
 */

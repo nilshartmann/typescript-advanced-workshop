@@ -9,23 +9,7 @@ export default undefined;
 
 // Eine fiktive JAVASCRIPT "Bibliothek"
 // wie können wir die vernünftig mit Typen versehen?
-function validateObject(object) {
-  if (object == null || typeof object !== "object") {
-    throw new Error("invalid type");
-  }
-
-  function validateField(value: any) {
-    // Validierungslogik...
-    // (da kümmern wir uns später drum!)
-    return true; // oder false
-  }
-
-  const result = {};
-  Object.keys(object).forEach((k) => {
-    result[k] = validateField(object[k]);
-  });
-  return result;
-}
+declare function validateObject(object: any): any;
 
 type Person = {
   firstname: "Klaus";
