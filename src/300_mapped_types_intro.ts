@@ -2,8 +2,8 @@ export default undefined;
 // Schritte:
 //  - Mapped Type konkret für Person
 //    - weitere Beispiele:
-//      - optional
-//      - Original-Typ! oder null
+//      - Alle Keys werden optional
+//      - Original-Typ kommt zurück oder null
 //        - Erinnerung: index operator!
 //  - für bel. Objekt (Generics)
 

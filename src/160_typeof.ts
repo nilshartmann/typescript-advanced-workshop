@@ -7,7 +7,7 @@ const languages = {
   en: "EN",
 };
 
-// TYPESCFIPT
+// TYPESCRIPT
 type TLanguages = typeof languages; // TLanguages ist TYPE, languages ist WERT
 // { de: string; en: string; }
 
